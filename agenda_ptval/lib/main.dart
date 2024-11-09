@@ -66,13 +66,11 @@ class _MyHomePageState extends State<MyHomePage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Flexible(
-            child: Image.asset(
-              'assets/profesor.png',
-              width: MediaQuery.of(context).size.width * 0.4,
-              height: MediaQuery.of(context).size.width * 0.4,
-              semanticLabel: 'Imagen de un profesor',
-            ),
+          Image.asset(
+            'assets/profesor.png',
+            width: MediaQuery.of(context).size.width * 0.4,
+            height: MediaQuery.of(context).size.width * 0.4,
+            semanticLabel: 'Imagen de un profesor',
           ),
           const SizedBox(height: 10),
           const Text(
@@ -91,13 +89,11 @@ class _MyHomePageState extends State<MyHomePage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Flexible(
-            child: Image.asset(
-              'assets/estudiante.png',
-              width: MediaQuery.of(context).size.width * 0.4,
-              height: MediaQuery.of(context).size.width * 0.4,
-              semanticLabel: 'Imagen de un estudiante',
-            ),
+          Image.asset(
+            'assets/estudiante.png',
+            width: MediaQuery.of(context).size.width * 0.4,
+            height: MediaQuery.of(context).size.width * 0.4,
+            semanticLabel: 'Imagen de un estudiante',
           ),
           const SizedBox(height: 10),
           const Text(
@@ -111,9 +107,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final isPortrait = MediaQuery.of(context).orientation == Orientation.portrait;
     final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
       appBar: AppBar(
@@ -122,35 +116,16 @@ class _MyHomePageState extends State<MyHomePage> {
         centerTitle: true, // Centra el título
       ),
       body: Center(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return SingleChildScrollView(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: constraints.maxHeight,
-                ),
-                child: IntrinsicHeight(
-                  child: isPortrait
-                      ? Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _buildProfesorOption(context),
-                            SizedBox(height: screenHeight * 0.05),
-                            _buildEstudianteOption(context),
-                          ],
-                        )
-                      : Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            _buildProfesorOption(context),
-                            SizedBox(width: screenWidth * 0.05),
-                            _buildEstudianteOption(context),
-                          ],
-                        ),
-                ),
-              ),
-            );
-          },
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildProfesorOption(context),
+              SizedBox(width: screenWidth * 0.05),
+              _buildEstudianteOption(context),
+            ],
+          ),
         ),
       ),
     );
