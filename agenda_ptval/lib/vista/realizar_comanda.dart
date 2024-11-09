@@ -7,10 +7,10 @@ class RealizarComanda extends StatefulWidget {
 }
 
 class _RealizarComandaState extends State<RealizarComanda> {
-  final List<String> _tiposMenu = ['Menu 1', 'Menu 2', 'Menu 3'];
   final Map<String, Map<String, int>> _comandas = {};
   final Map<String, List<String>> _notas = {};
   List<String> _clases = [];
+  List<String> _tiposMenu = [];
   String _notaActual = '';
   final PageController _pageController = PageController();
   int _paginaActual = 0;
@@ -20,6 +20,7 @@ class _RealizarComandaState extends State<RealizarComanda> {
   void initState() {
     super.initState();
     _obtenerClases();
+    _obtenerMenus();
   }
 
   Future<void> _obtenerClases() async {
@@ -40,6 +41,25 @@ class _RealizarComandaState extends State<RealizarComanda> {
       });
     } catch (e) {
       print('Error al obtener clases: $e');
+    }
+  }
+
+  Future<void> _obtenerMenus() async {
+    try {
+      QuerySnapshot snapshot =
+          await FirebaseFirestore.instance.collection('menus').get();
+      List<String> menus =
+          snapshot.docs.map((doc) => doc['nombre'] as String).toList();
+      setState(() {
+        _tiposMenu = menus;
+        for (var clase in _clases) {
+          for (var tipoMenu in _tiposMenu) {
+            _comandas[clase]![tipoMenu] = 0;
+          }
+        }
+      });
+    } catch (e) {
+      print('Error al obtener menús: $e');
     }
   }
 
@@ -92,7 +112,7 @@ class _RealizarComandaState extends State<RealizarComanda> {
       ),
       body: Stack(
         children: [
-          _clases.isEmpty
+          _clases.isEmpty || _tiposMenu.isEmpty
               ? Center(child: CircularProgressIndicator())
               : PageView.builder(
                   controller: _pageController,
