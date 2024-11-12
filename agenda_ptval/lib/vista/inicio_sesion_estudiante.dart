@@ -6,6 +6,7 @@ import 'package:crypto/crypto.dart';
 import 'pagina_principal_estudiante.dart'; // Importar la nueva página principal
 
 class InicioSesionEstudiante extends StatefulWidget {
+
   const InicioSesionEstudiante({super.key});
 
   @override
@@ -306,6 +307,7 @@ class _InicioSesionEstudianteState extends State<InicioSesionEstudiante> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Inicio de Sesión - Estudiante'),
@@ -316,7 +318,6 @@ class _InicioSesionEstudianteState extends State<InicioSesionEstudiante> {
             ? _buildStudentGrid()
             : Center(
                 child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
