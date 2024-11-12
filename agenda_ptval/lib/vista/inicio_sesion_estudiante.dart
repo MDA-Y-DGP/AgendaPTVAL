@@ -39,7 +39,8 @@ class _InicioSesionEstudianteState extends State<InicioSesionEstudiante> {
 
   Future<void> _cargarEstudiantes() async {
     try {
-      List<Map<String, dynamic>> lista = await _estudianteController.obtenerNombreGradoDeEstudiantes();
+      List<Map<String, dynamic>> lista =
+          await _estudianteController.obtenerNombreGradoDeEstudiantes();
       setState(() {
         estudiantes = lista;
       });
@@ -61,14 +62,16 @@ class _InicioSesionEstudianteState extends State<InicioSesionEstudiante> {
     if (_formKey.currentState!.validate()) {
       String password = hashPassword(_passwordController.text);
 
-      final estudiante = await _estudianteController.iniciarSesion(estudianteSeleccionado!['nickname']!, password);
+      final estudiante = await _estudianteController.iniciarSesion(
+          estudianteSeleccionado!['nickname']!, password);
 
       if (estudiante != null) {
         // Credenciales válidas
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => PaginaPrincipalEstudiante(nickname: estudianteSeleccionado!['nickname']),
+            builder: (context) => PaginaPrincipalEstudiante(
+                nickname: estudianteSeleccionado!['nickname']),
           ),
         );
       } else {
@@ -87,12 +90,15 @@ class _InicioSesionEstudianteState extends State<InicioSesionEstudiante> {
     }
 
     // Obtener el grado de aprendizaje del estudiante seleccionado
-    String gradoAprendizaje = estudianteSeleccionado!['gradoAprendizaje'] ?? 'alto';
+    String gradoAprendizaje =
+        estudianteSeleccionado!['gradoAprendizaje'] ?? 'alto';
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        double widthFactor = constraints.maxWidth * 0.8; // Ajusta el ancho relativo a la pantalla
-        double imageSize = (constraints.maxWidth - 32) / 3; // Ajusta el tamaño de la imagen
+        double widthFactor = constraints.maxWidth *
+            0.8; // Ajusta el ancho relativo a la pantalla
+        double imageSize =
+            (constraints.maxWidth - 32) / 3; // Ajusta el tamaño de la imagen
         double maxImageSize = 100; // Tamaño máximo de la imagen
 
         if (imageSize > maxImageSize) {
@@ -112,7 +118,8 @@ class _InicioSesionEstudianteState extends State<InicioSesionEstudiante> {
                     children: [
                       Text(
                         'Hola, ${estudianteSeleccionado!['nickname']}!',
-                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
@@ -155,27 +162,33 @@ class _InicioSesionEstudianteState extends State<InicioSesionEstudiante> {
                   children: [
                     Text(
                       'Hola, ${estudianteSeleccionado!['nickname']}!',
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 16),
                     const Text('Ingresa tu contraseña usando los pictogramas:'),
                     const SizedBox(height: 10),
                     Container(
                       constraints: BoxConstraints(
-                        maxHeight: constraints.maxHeight * 0.4, // Limita la altura del contenedor
-                        maxWidth: constraints.maxWidth * 0.8, // Limita el ancho del contenedor
+                        maxHeight: constraints.maxHeight *
+                            0.4, // Limita la altura del contenedor
+                        maxWidth: constraints.maxWidth *
+                            0.8, // Limita el ancho del contenedor
                       ),
                       child: LayoutBuilder(
                         builder: (context, innerConstraints) {
-                          double imageSize = innerConstraints.maxWidth / 3 - 16; // Ajusta el tamaño de la imagen
-                          double maxImageSize = 100; // Tamaño máximo de la imagen
+                          double imageSize = innerConstraints.maxWidth / 3 -
+                              16; // Ajusta el tamaño de la imagen
+                          double maxImageSize =
+                              100; // Tamaño máximo de la imagen
                           if (imageSize > maxImageSize) {
                             imageSize = maxImageSize;
                           }
                           return GridView.builder(
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 3,
                               childAspectRatio: 1,
                               mainAxisSpacing: 8,
@@ -185,7 +198,8 @@ class _InicioSesionEstudianteState extends State<InicioSesionEstudiante> {
                             itemBuilder: (context, index) {
                               int pictogramaNumero = index + 1;
                               return GestureDetector(
-                                onTap: () => _agregarDigitoPictograma(pictogramaNumero),
+                                onTap: () =>
+                                    _agregarDigitoPictograma(pictogramaNumero),
                                 child: Image.asset(
                                   'assets/Sol.png',
                                   fit: BoxFit.contain,
@@ -249,7 +263,8 @@ class _InicioSesionEstudianteState extends State<InicioSesionEstudiante> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => PaginaPrincipalEstudiante(nickname: estudianteSeleccionado!['nickname']),
+            builder: (context) => PaginaPrincipalEstudiante(
+                nickname: estudianteSeleccionado!['nickname']),
           ),
         );
       } else {
@@ -280,7 +295,8 @@ class _InicioSesionEstudianteState extends State<InicioSesionEstudiante> {
           child: Column(
             children: [
               FutureBuilder<String>(
-                future: _imagenController.obtenerFotoPerfil(estudiante['nickname']),
+                future:
+                    _imagenController.obtenerFotoPerfil(estudiante['nickname']),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const CircularProgressIndicator();
@@ -297,7 +313,8 @@ class _InicioSesionEstudianteState extends State<InicioSesionEstudiante> {
                 },
               ),
               const SizedBox(height: 8),
-              Text(estudiante['nickname']!, style: const TextStyle(fontSize: 16)),
+              Text(estudiante['nickname']!,
+                  style: const TextStyle(fontSize: 16)),
             ],
           ),
         );
@@ -322,17 +339,21 @@ class _InicioSesionEstudianteState extends State<InicioSesionEstudiante> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       GestureDetector(
-                        onTap: () => setState(() => estudianteSeleccionado = null),
+                        onTap: () =>
+                            setState(() => estudianteSeleccionado = null),
                         child: FutureBuilder<String>(
-                          future: _imagenController.obtenerFotoPerfil(estudianteSeleccionado!['nickname']),
+                          future: _imagenController.obtenerFotoPerfil(
+                              estudianteSeleccionado!['nickname']),
                           builder: (context, snapshot) {
-                            if (snapshot.connectionState == ConnectionState.waiting) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
                               return const CircularProgressIndicator();
                             } else if (snapshot.hasError) {
                               return const Icon(Icons.error);
                             } else if (snapshot.hasData) {
                               return CircleAvatar(
-                                radius: 40, // Hacer la imagen del perfil más pequeña
+                                radius:
+                                    40, // Hacer la imagen del perfil más pequeña
                                 backgroundImage: NetworkImage(snapshot.data!),
                               );
                             } else {
