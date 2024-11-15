@@ -8,7 +8,7 @@ class TareaController {
   final CollectionReference _estudiantesCollection =
       FirebaseFirestore.instance.collection('estudiantes');
 
-  Future<void> crearTarea(Tarea tarea) async {
+  Future<int> crearTarea(Tarea tarea) async {
     // Obtener todas las tareas para encontrar el mayor ID
     QuerySnapshot querySnapshot = await _tareasCollection.get();
     int maxId = 0;
@@ -33,6 +33,8 @@ class TareaController {
 
     // Guardar la nueva tarea en Firestore, dejando que Firebase asigne el ID del documento
     await _tareasCollection.add(nuevaTarea.toMap());
+
+    return newId; //Necesario para asignarle el ID a los pasos
   }
 
   Future<List<Tarea>> obtenerTodasLasTareas() async {
