@@ -1,17 +1,12 @@
 import 'package:flutter/material.dart';
 import '../modelo/profesor_modelo.dart';
 import '../controlador/profesor_controller.dart';
-import 'agregar_clase.dart';
-import 'registro_estudiante.dart';
-import 'registro_profesor.dart'; // Importar la pantalla de registro de profesor
-import 'crear_tarea.dart'; // Importar la pantalla de creación de tareas
-import 'asignar_tarea_comedor.dart'; // Importar la pantalla de asignar tarea comedor
-import 'crear_menus.dart'; // Importar la pantalla de creación de menús
+import 'pedir_materiales.dart'; // Importar la pantalla de pedir materiales
 
-class PantallaInicioAdministrador extends StatelessWidget {
+class PantallaInicioProfesor extends StatelessWidget {
   final Profesor profesor;
 
-  const PantallaInicioAdministrador({super.key, required this.profesor});
+  const PantallaInicioProfesor({super.key, required this.profesor});
 
   @override
   Widget build(BuildContext context) {
@@ -50,68 +45,10 @@ class PantallaInicioAdministrador extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => AgregarClase()),
+                  MaterialPageRoute(builder: (context) => PedirMateriales()),
                 );
               },
-              child: const Text('Agregar Clase'),
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => RegistroEstudiante()),
-                );
-              },
-              child: const Text('Registrar Estudiante'),
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          RegistroProfesor()), // Navegar a la pantalla de registro de profesor
-                );
-              },
-              child: const Text('Registrar Profesor'),
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          CrearTarea()), // Navegar a la pantalla de creación de tareas
-                );
-              },
-              child: const Text('Crear Tarea'),
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          AsignarTareaComedor()), // Navegar a la pantalla de asignar tarea comedor
-                );
-              },
-              child: const Text('Asignar Tarea Comedor'),
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          CrearMenu()), // Navegar a la pantalla de creación de menús
-                );
-              },
-              child: const Text('Crear Menú'),
+              child: const Text('Pedir Materiales'),
             ),
           ],
         ),
@@ -119,6 +56,7 @@ class PantallaInicioAdministrador extends StatelessWidget {
     );
   }
 }
+
 
 class ModificarContrasena extends StatefulWidget {
   final Profesor profesor;

@@ -95,4 +95,24 @@ class ProfesorController {
     }
     return null;
   }
+
+  Future<void> modificarContrasena(String nickname, String nuevaContrasena) async {
+    String hashedPassword = _hashPassword(nuevaContrasena);
+    QuerySnapshot querySnapshot = await _profesoresCollection
+        .where('nickname', isEqualTo: nickname)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      DocumentSnapshot doc = querySnapshot.docs.first;
+      await doc.reference.update({'contraseña': hashedPassword});
+    } else {
+      throw Exception('No se encontró el profesor con este nickname');
+    }
+  }
+
+  String _hashPassword(String password) {
+    var bytes = utf8.encode(password);
+    var digest = sha256.convert(bytes);
+    return digest.toString();
+  }
 }

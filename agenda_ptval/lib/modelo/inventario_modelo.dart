@@ -1,7 +1,7 @@
 class Inventario {
   final int idObjeto;
   final String nombre;
-  final int cantidad;
+  int cantidad;
 
   Inventario({
     required this.idObjeto,

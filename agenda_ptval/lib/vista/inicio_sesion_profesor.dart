@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import '../controlador/profesor_controller.dart';
 import 'inicio_administrador.dart';
+import 'inicio_profesor.dart'; // Importar la nueva pantalla para profesores
 
 class InicioSesionProfesor extends StatefulWidget {
-
   const InicioSesionProfesor({super.key});
 
   @override
@@ -34,13 +34,22 @@ class _InicioSesionState extends State<InicioSesionProfesor> {
         final profesor = await _profesorController.verificarCredenciales(nickname, password);
 
         if (profesor != null) {
-          // Credenciales válidas, navegar a la nueva pantalla con el modelo de profesor
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => PantallaInicioAdministrador(profesor: profesor),
-            ),
-          );
+          // Credenciales válidas, navegar a la nueva pantalla según el rol
+          if (profesor.administrador) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => PantallaInicioAdministrador(profesor: profesor),
+              ),
+            );
+          } else {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => PantallaInicioProfesor(profesor: profesor),
+              ),
+            );
+          }
         } else {
           // Credenciales inválidas
           ScaffoldMessenger.of(context).showSnackBar(
