@@ -3,12 +3,14 @@ class Tarea {
   final String titulo;
   final String descripcion;
   final String tipo;
+  String? evaluacion;
 
   Tarea({
     required this.idTarea,
     required this.titulo,
     required this.descripcion,
     required this.tipo,
+    this.evaluacion,
   });
 
   Map<String, dynamic> toMap() {
@@ -17,6 +19,7 @@ class Tarea {
       'titulo': titulo,
       'descripcion': descripcion,
       'tipo': tipo,
+      'evaluacion': evaluacion,
     };
   }
 
@@ -26,6 +29,7 @@ class Tarea {
       titulo: map['titulo'],
       descripcion: map['descripcion'],
       tipo: map['tipo'],
+      evaluacion: map['evaluacion'],
     );
   }
 }

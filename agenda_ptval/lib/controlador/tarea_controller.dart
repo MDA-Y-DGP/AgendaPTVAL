@@ -29,6 +29,7 @@ class TareaController {
       titulo: tarea.titulo,
       descripcion: tarea.descripcion,
       tipo: tarea.tipo,
+      evaluacion: tarea.evaluacion, // Añadir el campo de evaluación
     );
 
     // Guardar la nueva tarea en Firestore, dejando que Firebase asigne el ID del documento
@@ -95,6 +96,20 @@ class TareaController {
       }
     } else {
       throw Exception('Estudiante no encontrado');
+    }
+  }
+
+  Future<void> evaluarTarea(int idTarea, String evaluacion) async {
+    // Buscar la tarea por ID
+    QuerySnapshot querySnapshot = await _tareasCollection.where('idTarea', isEqualTo: idTarea).get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      DocumentSnapshot tareaDoc = querySnapshot.docs.first;
+
+      // Actualizar el campo de evaluación de la tarea
+      await tareaDoc.reference.update({'evaluacion': evaluacion});
+    } else {
+      throw Exception('Tarea no encontrada');
     }
   }
 }
