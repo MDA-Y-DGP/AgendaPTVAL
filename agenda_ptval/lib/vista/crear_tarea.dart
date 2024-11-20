@@ -108,7 +108,8 @@ class _CrearTareaState extends State<CrearTarea> {
                     if (_tipo == 'por pasos') {
                       for (var i = 0; i < _pasos.length; i++) {
                         var paso = _pasos[i];
-                        if (paso['mediaFile'] != null || paso['mediaBytes'] != null) {
+                        if (paso['urlMedia'] == null &&
+                            (paso['mediaFile'] != null || paso['mediaBytes'] != null)) {
                           String? urlMedia = await _subirImagenPaso(
                               paso['mediaFile'], paso['mediaBytes'], i);
                           paso['urlMedia'] = urlMedia;
@@ -173,10 +174,10 @@ class _CrearTareaState extends State<CrearTarea> {
     return ElevatedButton(
       onPressed: () async {
         if (_nuevoPasoController.text.isNotEmpty) {
-          String? urlMedia;
-          if (_mediaFile != null || _mediaBytes != null) {
-            urlMedia = await _subirImagenPaso(_mediaFile, _mediaBytes, _pasos.length);
-          }
+          String? urlMedia = _mediaFile != null || _mediaBytes != null
+              ? await _subirImagenPaso(_mediaFile, _mediaBytes, _pasos.length)
+              : null;
+
           setState(() {
             _pasos.add({
               'texto': _nuevoPasoController.text,
@@ -223,19 +224,13 @@ class _CrearTareaState extends State<CrearTarea> {
     if (mediaFile != null || mediaBytes != null) {
       try {
         String nombreArchivo = _mediaFileName ?? '';
-
-        // Verificar que el nombre del archivo no sea solo un número
         if (RegExp(r'^\d+$').hasMatch(nombreArchivo)) {
           return null;
         }
 
-        // Construir el nombre final con el índice del paso y el nombre del archivo
         String nombreFinal = '$pasoIndex $nombreArchivo';
-
-        // Ruta donde se almacenará la imagen
         String ruta = 'tareas/${_tituloController.text}';
 
-        // Subir la imagen dependiendo de la fuente (web o dispositivo local)
         if (kIsWeb && mediaBytes != null) {
           return await _imagenController.subirImagenWebPaso(mediaBytes, ruta, nombreFinal);
         } else if (mediaFile != null) {
