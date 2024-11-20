@@ -3,12 +3,14 @@ class Tarea {
   final String titulo;
   final String descripcion;
   final String tipo;
+  final List<String>? pasos; // Array de pasos
 
   Tarea({
     required this.idTarea,
     required this.titulo,
     required this.descripcion,
     required this.tipo,
+    this.pasos,
   });
 
   Map<String, dynamic> toMap() {
@@ -17,6 +19,7 @@ class Tarea {
       'titulo': titulo,
       'descripcion': descripcion,
       'tipo': tipo,
+      'pasos': pasos,
     };
   }
 
@@ -26,6 +29,7 @@ class Tarea {
       titulo: map['titulo'],
       descripcion: map['descripcion'],
       tipo: map['tipo'],
+      pasos: List<String>.from(map['pasos'] ?? []),
     );
   }
 }

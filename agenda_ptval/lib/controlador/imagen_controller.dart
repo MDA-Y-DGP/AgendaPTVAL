@@ -25,6 +25,8 @@ class ImagenController {
     }
   }
 
+
+
   Future<String> obtenerFotoPerfil(String nickname) async {
     try {
       final storageRef = FirebaseStorage.instance.ref().child('img_perfil/$nickname.jpg');

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:agenda_ptval/controlador/tarea_controller.dart';
-import 'package:agenda_ptval/controlador/paso_controller.dart';
+import 'package:agenda_ptval/controlador/imagen_controller.dart';
 import 'package:agenda_ptval/modelo/tarea_modelo.dart';
-import 'package:agenda_ptval/modelo/paso_modelo.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:typed_data';
 
 class CrearTarea extends StatefulWidget {
   @override
@@ -12,13 +15,18 @@ class CrearTarea extends StatefulWidget {
 class _CrearTareaState extends State<CrearTarea> {
   final _formKey = GlobalKey<FormState>();
   final TareaController _tareaController = TareaController();
-  final PasoController _pasoController = PasoController();
+  final ImagenController _imagenController = ImagenController();
 
   final TextEditingController _tituloController = TextEditingController();
   final TextEditingController _descripcionController = TextEditingController();
+  final TextEditingController _nuevoPasoController = TextEditingController();
   String _tipo = 'comedor'; // Valor predeterminado
 
-  List<Paso> _pasos = [];
+  List<Map<String, dynamic>> _pasos = [];
+  File? _mediaFile;
+  Uint8List? _mediaBytes;
+  String? _mediaFileName;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   Widget build(BuildContext context) {
@@ -80,26 +88,10 @@ class _CrearTareaState extends State<CrearTarea> {
               ),
               const SizedBox(height: 16),
               if (_tipo == 'por pasos') ...[
-                ElevatedButton(
-                  onPressed: () {
-                    _mostrarDialogoAgregarPaso(context);
-                  },
-                  child: const Text('Agregar Paso'),
-                ),
-                const SizedBox(height: 16),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: _pasos.length,
-                    itemBuilder: (context, index) {
-                      return ListTile(
-                        title: Text(_pasos[index].texto),
-                        subtitle: _pasos[index].urlMedia != null
-                            ? Text('Media: ${_pasos[index].urlMedia}')
-                            : null,
-                      );
-                    },
-                  ),
-                ),
+                _buildPasosList(),
+                _buildAddPasoField(),
+                const SizedBox(height: 10),
+                _buildAddPasoButton(),
               ],
               ElevatedButton(
                 onPressed: () async {
@@ -109,18 +101,18 @@ class _CrearTareaState extends State<CrearTarea> {
                       titulo: _tituloController.text,
                       descripcion: _descripcionController.text,
                       tipo: _tipo,
+                      pasos: _pasos.map((paso) => paso['texto'] as String).toList(),
                     );
                     int idTareaPorPasos = await _tareaController.crearTarea(nuevaTarea);
 
                     if (_tipo == 'por pasos') {
-                      for (var paso in _pasos) {
-                        paso = Paso(
-                          idPaso: paso.idPaso,
-                          idTareaPorPasos: idTareaPorPasos,
-                          texto: paso.texto,
-                          urlMedia: paso.urlMedia,
-                        );
-                        await _pasoController.crearPaso(paso);
+                      for (var i = 0; i < _pasos.length; i++) {
+                        var paso = _pasos[i];
+                        if (paso['mediaFile'] != null || paso['mediaBytes'] != null) {
+                          String? urlMedia = await _subirImagenPaso(
+                              paso['mediaFile'], paso['mediaBytes']);
+                          paso['urlMedia'] = urlMedia;
+                        }
                       }
                     }
 
@@ -139,69 +131,114 @@ class _CrearTareaState extends State<CrearTarea> {
     );
   }
 
-  void _mostrarDialogoAgregarPaso(BuildContext context) {
-    final TextEditingController _textoPasoController = TextEditingController();
-    final TextEditingController _urlMediaController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Agregar Paso'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextFormField(
-                controller: _textoPasoController,
-                decoration: InputDecoration(
-                  labelText: 'Texto del Paso',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor ingresa un texto';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _urlMediaController,
-                decoration: InputDecoration(
-                  labelText: 'URL de Media (opcional)',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('Cancelar'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (_textoPasoController.text.isNotEmpty) {
-                  setState(() {
-                    _pasos.add(Paso(
-                      idPaso: 0, // Este valor se actualizará en el controlador
-                      idTareaPorPasos: 0, // Este valor se actualizará en el controlador
-                      texto: _textoPasoController.text,
-                      urlMedia: _urlMediaController.text.isNotEmpty
-                          ? _urlMediaController.text
-                          : null,
-                    ));
-                  });
-                  Navigator.of(context).pop();
-                }
-              },
-              child: Text('Agregar Paso'),
-            ),
-          ],
-        );
-      },
+  Widget _buildPasosList() {
+    return Expanded(
+      child: ListView.builder(
+        itemCount: _pasos.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            title: Text(_pasos[index]['texto']),
+            subtitle: _pasos[index]['urlMedia'] != null
+                ? Text('Media: ${_pasos[index]['urlMedia']}')
+                : null,
+          );
+        },
+      ),
     );
+  }
+
+  Widget _buildAddPasoField() {
+    return Column(
+      children: [
+        TextField(
+          controller: _nuevoPasoController,
+          decoration: InputDecoration(
+            labelText: 'Texto del Paso',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        const SizedBox(height: 10),
+        ListTile(
+          title: Text(_mediaFile == null && _mediaBytes == null
+              ? 'Selecciona una imagen/video (opcional)'
+              : 'Media seleccionada: $_mediaFileName'),
+          trailing: const Icon(Icons.image),
+          onTap: _pickMedia,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAddPasoButton() {
+    return ElevatedButton(
+      onPressed: () async {
+        if (_nuevoPasoController.text.isNotEmpty) {
+          String? urlMedia;
+          if (_mediaFile != null || _mediaBytes != null) {
+            urlMedia = await _subirImagenPaso(_mediaFile, _mediaBytes);
+          }
+          setState(() {
+            _pasos.add({
+              'texto': _nuevoPasoController.text,
+              'mediaFile': _mediaFile,
+              'mediaBytes': _mediaBytes,
+              'urlMedia': urlMedia,
+            });
+            _nuevoPasoController.clear();
+            _mediaFile = null;
+            _mediaBytes = null;
+            _mediaFileName = null;
+          });
+        }
+      },
+      child: const Text('Agregar Paso'),
+    );
+  }
+
+  Future<void> _pickMedia() async {
+    try {
+      final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+      if (pickedFile != null) {
+        if (kIsWeb) {
+          final bytes = await pickedFile.readAsBytes();
+          setState(() {
+            _mediaBytes = bytes;
+            _mediaFileName = pickedFile.name;
+          });
+        } else {
+          setState(() {
+            _mediaFile = File(pickedFile.path);
+            _mediaFileName = pickedFile.path.split('/').last;
+          });
+        }
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al seleccionar la media: $e')),
+      );
+    }
+  }
+
+  Future<String?> _subirImagenPaso(File? mediaFile, Uint8List? mediaBytes) async {
+    if (mediaFile != null || mediaBytes != null) {
+      try {
+        String nombreArchivo = _mediaFileName ?? '';
+
+        // Ruta donde se almacenará la imagen
+        String ruta = 'tareas/${_tituloController.text}';
+
+        // Subir la imagen dependiendo de la fuente (web o dispositivo local)
+        if (kIsWeb && mediaBytes != null) {
+          return await _imagenController.subirImagenWeb(mediaBytes, ruta, nombreArchivo);
+        } else if (mediaFile != null) {
+          return await _imagenController.subirImagen(mediaFile, ruta, nombreArchivo);
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al subir la imagen: $e')),
+        );
+      }
+    }
+    return null;
   }
 }

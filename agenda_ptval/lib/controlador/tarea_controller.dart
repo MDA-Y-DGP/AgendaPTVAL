@@ -29,6 +29,7 @@ class TareaController {
       titulo: tarea.titulo,
       descripcion: tarea.descripcion,
       tipo: tarea.tipo,
+      pasos: tarea.pasos,
     );
 
     // Guardar la nueva tarea en Firestore, dejando que Firebase asigne el ID del documento
@@ -47,6 +48,15 @@ class TareaController {
   Future<List<Tarea>> obtenerTareasDeTipoComedor() async {
     QuerySnapshot querySnapshot = await _tareasCollection
         .where('tipo', isEqualTo: 'comedor')
+        .get();
+    return querySnapshot.docs.map((doc) {
+      return Tarea.fromMap(doc.data() as Map<String, dynamic>);
+    }).toList();
+  }
+
+  Future<List<Tarea>> obtenerTareasPorPasos() async {
+    QuerySnapshot querySnapshot = await _tareasCollection
+        .where('tipo', isEqualTo: 'por_pasos')
         .get();
     return querySnapshot.docs.map((doc) {
       return Tarea.fromMap(doc.data() as Map<String, dynamic>);
