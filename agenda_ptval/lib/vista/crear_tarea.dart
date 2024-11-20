@@ -110,7 +110,7 @@ class _CrearTareaState extends State<CrearTarea> {
                         var paso = _pasos[i];
                         if (paso['mediaFile'] != null || paso['mediaBytes'] != null) {
                           String? urlMedia = await _subirImagenPaso(
-                              paso['mediaFile'], paso['mediaBytes']);
+                              paso['mediaFile'], paso['mediaBytes'], i);
                           paso['urlMedia'] = urlMedia;
                         }
                       }
@@ -175,7 +175,7 @@ class _CrearTareaState extends State<CrearTarea> {
         if (_nuevoPasoController.text.isNotEmpty) {
           String? urlMedia;
           if (_mediaFile != null || _mediaBytes != null) {
-            urlMedia = await _subirImagenPaso(_mediaFile, _mediaBytes);
+            urlMedia = await _subirImagenPaso(_mediaFile, _mediaBytes, _pasos.length);
           }
           setState(() {
             _pasos.add({
@@ -219,19 +219,27 @@ class _CrearTareaState extends State<CrearTarea> {
     }
   }
 
-  Future<String?> _subirImagenPaso(File? mediaFile, Uint8List? mediaBytes) async {
+  Future<String?> _subirImagenPaso(File? mediaFile, Uint8List? mediaBytes, int pasoIndex) async {
     if (mediaFile != null || mediaBytes != null) {
       try {
         String nombreArchivo = _mediaFileName ?? '';
+
+        // Verificar que el nombre del archivo no sea solo un número
+        if (RegExp(r'^\d+$').hasMatch(nombreArchivo)) {
+          return null;
+        }
+
+        // Construir el nombre final con el índice del paso y el nombre del archivo
+        String nombreFinal = '$pasoIndex $nombreArchivo';
 
         // Ruta donde se almacenará la imagen
         String ruta = 'tareas/${_tituloController.text}';
 
         // Subir la imagen dependiendo de la fuente (web o dispositivo local)
         if (kIsWeb && mediaBytes != null) {
-          return await _imagenController.subirImagenWeb(mediaBytes, ruta, nombreArchivo);
+          return await _imagenController.subirImagenWebPaso(mediaBytes, ruta, nombreFinal);
         } else if (mediaFile != null) {
-          return await _imagenController.subirImagen(mediaFile, ruta, nombreArchivo);
+          return await _imagenController.subirImagenPaso(mediaFile, ruta, nombreFinal);
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
