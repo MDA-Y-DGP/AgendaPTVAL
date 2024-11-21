@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../controlador/profesor_controller.dart';
-import 'inicio_administrador.dart';
-import 'inicio_profesor.dart'; // Importar la nueva pantalla para profesores
+import 'inicio_profesor.dart';
 
 class InicioSesionProfesor extends StatefulWidget {
   const InicioSesionProfesor({super.key});
@@ -35,21 +34,12 @@ class _InicioSesionState extends State<InicioSesionProfesor> {
 
         if (profesor != null) {
           // Credenciales válidas, navegar a la nueva pantalla según el rol
-          if (profesor.administrador) {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (context) => PantallaInicioAdministrador(profesor: profesor),
+                builder: (context) => PantallaInicio(profesor: profesor),
               ),
             );
-          } else {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => PantallaInicioProfesor(profesor: profesor),
-              ),
-            );
-          }
         } else {
           // Credenciales inválidas
           ScaffoldMessenger.of(context).showSnackBar(
@@ -68,7 +58,7 @@ class _InicioSesionState extends State<InicioSesionProfesor> {
   Widget _buildLogo() {
     return Column(
       children: [
-        Image.asset('assets/profesor.png', height: 250),
+        Image.asset('assets/profesor.png', height: 150), // Imagen más pequeña
         const SizedBox(height: 20),
         const Text(
           'Inicio de Sesión - Profesor',
@@ -193,6 +183,9 @@ class _InicioSesionState extends State<InicioSesionProfesor> {
 
   @override
   Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double padding = screenWidth * 0.1; // 10% del ancho de la pantalla
+
     return Scaffold(
       appBar: AppBar(
         leading: Semantics(
@@ -212,7 +205,7 @@ class _InicioSesionState extends State<InicioSesionProfesor> {
         children: [
           Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
+              padding: EdgeInsets.symmetric(horizontal: padding),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

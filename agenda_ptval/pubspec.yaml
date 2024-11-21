@@ -75,7 +75,7 @@ flutter:
     - assets/estudiante.png
     - assets/profesor.png
     - assets/perfil_default.png
-    - assets/Sol.png
+    - assets/pictograma_contraseña1.png
 
 scripts:
   web: flutter run -d chrome --web-renderer html

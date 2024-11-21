@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:agenda_ptval/controlador/tarea_controller.dart';
 import 'package:agenda_ptval/controlador/imagen_controller.dart';
-import 'package:agenda_ptval/modelo/tarea_modelo.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -14,7 +12,6 @@ class CrearTarea extends StatefulWidget {
 
 class _CrearTareaState extends State<CrearTarea> {
   final _formKey = GlobalKey<FormState>();
-  final TareaController _tareaController = TareaController();
   final ImagenController _imagenController = ImagenController();
 
   final TextEditingController _tituloController = TextEditingController();
@@ -40,52 +37,11 @@ class _CrearTareaState extends State<CrearTarea> {
           key: _formKey,
           child: Column(
             children: [
-              TextFormField(
-                controller: _tituloController,
-                decoration: InputDecoration(
-                  labelText: 'Título',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor ingresa un título';
-                  }
-                  return null;
-                },
-              ),
+              _buildTextField(_tituloController, 'Título', 'Por favor ingresa un título'),
               const SizedBox(height: 16),
-              TextFormField(
-                controller: _descripcionController,
-                decoration: InputDecoration(
-                  labelText: 'Descripción',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor ingresa una descripción';
-                  }
-                  return null;
-                },
-              ),
+              _buildTextField(_descripcionController, 'Descripción', 'Por favor ingresa una descripción'),
               const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                value: _tipo,
-                decoration: InputDecoration(
-                  labelText: 'Tipo de Tarea',
-                  border: OutlineInputBorder(),
-                ),
-                items: ['comedor', 'por pasos', 'inventario'].map((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    _tipo = newValue!;
-                  });
-                },
-              ),
+              _buildDropdownButtonFormField(),
               const SizedBox(height: 16),
               if (_tipo == 'por pasos') ...[
                 _buildPasosList(),
@@ -93,42 +49,49 @@ class _CrearTareaState extends State<CrearTarea> {
                 const SizedBox(height: 10),
                 _buildAddPasoButton(),
               ],
-              ElevatedButton(
-                onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
-                    Tarea nuevaTarea = Tarea(
-                      idTarea: 0, // Este valor se actualizará en el controlador
-                      titulo: _tituloController.text,
-                      descripcion: _descripcionController.text,
-                      tipo: _tipo,
-                      pasos: _pasos.map((paso) => paso['texto'] as String).toList(),
-                    );
-                    int idTareaPorPasos = await _tareaController.crearTarea(nuevaTarea);
-
-                    if (_tipo == 'por pasos') {
-                      for (var i = 0; i < _pasos.length; i++) {
-                        var paso = _pasos[i];
-                        if (paso['urlMedia'] == null &&
-                            (paso['mediaFile'] != null || paso['mediaBytes'] != null)) {
-                          String? urlMedia = await _subirImagenPaso(
-                              paso['mediaFile'], paso['mediaBytes'], i);
-                          paso['urlMedia'] = urlMedia;
-                        }
-                      }
-                    }
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Tarea creada correctamente')),
-                    );
-                    Navigator.pop(context);
-                  }
-                },
-                child: const Text('Crear Tarea'),
-              ),
+              const SizedBox(height: 16),
+              _buildCrearTareaButton(),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildTextField(TextEditingController controller, String labelText, String validationMessage) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: labelText,
+        border: OutlineInputBorder(),
+      ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return validationMessage;
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget _buildDropdownButtonFormField() {
+    return DropdownButtonFormField<String>(
+      value: _tipo,
+      decoration: InputDecoration(
+        labelText: 'Tipo de Tarea',
+        border: OutlineInputBorder(),
+      ),
+      items: ['comedor', 'por pasos', 'inventario'].map((String value) {
+        return DropdownMenuItem<String>(
+          value: value,
+          child: Text(value),
+        );
+      }).toList(),
+      onChanged: (String? newValue) {
+        setState(() {
+          _tipo = newValue!;
+        });
+      },
     );
   }
 
@@ -174,10 +137,10 @@ class _CrearTareaState extends State<CrearTarea> {
     return ElevatedButton(
       onPressed: () async {
         if (_nuevoPasoController.text.isNotEmpty) {
-          String? urlMedia = _mediaFile != null || _mediaBytes != null
-              ? await _subirImagenPaso(_mediaFile, _mediaBytes, _pasos.length)
-              : null;
-
+          String? urlMedia;
+          if (_mediaFile != null || _mediaBytes != null) {
+            urlMedia = await _subirImagenPaso(_mediaFile, _mediaBytes, _pasos.length);
+          }
           setState(() {
             _pasos.add({
               'texto': _nuevoPasoController.text,
@@ -193,6 +156,33 @@ class _CrearTareaState extends State<CrearTarea> {
         }
       },
       child: const Text('Agregar Paso'),
+    );
+  }
+
+  Widget _buildCrearTareaButton() {
+    return ElevatedButton(
+      onPressed: () async {
+        if (_formKey.currentState!.validate()) {
+
+          if (_tipo == 'por pasos') {
+            for (var i = 0; i < _pasos.length; i++) {
+              var paso = _pasos[i];
+              if (paso['urlMedia'] == null &&
+                  (paso['mediaFile'] != null || paso['mediaBytes'] != null)) {
+                String? urlMedia = await _subirImagenPaso(
+                    paso['mediaFile'], paso['mediaBytes'], i);
+                paso['urlMedia'] = urlMedia;
+              }
+            }
+          }
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Tarea creada correctamente')),
+          );
+          Navigator.pop(context);
+        }
+      },
+      child: const Text('Crear Tarea'),
     );
   }
 

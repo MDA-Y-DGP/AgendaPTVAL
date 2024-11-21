@@ -52,4 +52,42 @@ class ClaseController {
     QuerySnapshot snapshot = await _firestore.collection('clases').get();
     return snapshot.docs.map((doc) => Clase.fromMap(doc.data() as Map<String, dynamic>)).toList();
   }
+
+  /// Método para actualizar el nombre de una clase.
+/// 
+/// [idClase] es el identificador único de la clase a actualizar.
+/// [nuevoNombre] es el nuevo nombre que se asignará.
+Future<void> actualizarClase(int idClase, String nuevoNombre) async {
+  try {
+    QuerySnapshot snapshot = await _firestore
+        .collection('clases')
+        .where('id_clase', isEqualTo: idClase)
+        .get();
+
+    if (snapshot.docs.isNotEmpty) {
+      await snapshot.docs.first.reference.update({'nombre': nuevoNombre});
+    }
+  } catch (e) {
+    throw Exception('Error al actualizar la clase: $e');
+  }
+}
+
+/// Método para borrar una clase.
+/// 
+/// [idClase] es el identificador único de la clase que se quiere eliminar.
+Future<void> borrarClase(int idClase) async {
+  try {
+    QuerySnapshot snapshot = await _firestore
+        .collection('clases')
+        .where('id_clase', isEqualTo: idClase)
+        .get();
+
+    if (snapshot.docs.isNotEmpty) {
+      await snapshot.docs.first.reference.delete();
+    }
+  } catch (e) {
+    throw Exception('Error al borrar la clase: $e');
+  }
+}
+
 }
