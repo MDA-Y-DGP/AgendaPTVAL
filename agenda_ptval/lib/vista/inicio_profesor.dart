@@ -5,10 +5,11 @@ import '../controlador/profesor_controller.dart';
 import 'registro_estudiante.dart';
 import 'registro_profesor.dart';
 import 'crear_tarea.dart';
-import 'asignar_tarea_comedor.dart';
+import 'asignar_tarea.dart';
 import 'crear_menus.dart';
 import 'pedir_materiales.dart';
-import 'listas_inventario.dart'; // Importa la nueva vista
+import 'listas_inventario.dart';
+import 'evaluar_tarea.dart';
 
 class PantallaInicio extends StatefulWidget {
   final Profesor profesor;
@@ -126,8 +127,10 @@ class _PantallaInicioState extends State<PantallaInicio> {
               _buildButton(context, 'Registrar Profesor', RegistroProfesor(),
                   Icons.person_add),
               _buildButton(context, 'Crear Tarea', CrearTarea(), Icons.task),
-              _buildButton(context, 'Asignar Tarea Comedor',
-                  AsignarTareaComedor(), Icons.restaurant),
+              _buildButton(context, 'Asignar Tarea',
+                  AsignarTarea(), Icons.pending_actions),
+              _buildButton(context, 'Evaluar Tarea',
+                  EvaluarTarea(), Icons.thumb_up_alt),
               _buildButton(context, 'Crear Menú', CrearMenu(), Icons.menu_book),
               _buildButton(context, 'Crear Listas de Inventario',
                   CrearListasInventario(), Icons.list), // Nuevo botón

@@ -54,9 +54,18 @@ class TareaController {
     }).toList();
   }
 
-  Future<List<Tarea>> obtenerTareasPorPasos() async {
+  Future<List<Tarea>> obtenerTareasDeTipoPorPasos() async {
     QuerySnapshot querySnapshot = await _tareasCollection
-        .where('tipo', isEqualTo: 'por_pasos')
+        .where('tipo', isEqualTo: 'por pasos')
+        .get();
+    return querySnapshot.docs.map((doc) {
+      return Tarea.fromMap(doc.data() as Map<String, dynamic>);
+    }).toList();
+  }
+
+  Future<List<Tarea>> obtenerTareasDeTipoInventario() async {
+    QuerySnapshot querySnapshot = await _tareasCollection
+        .where('tipo', isEqualTo: 'inventario')
         .get();
     return querySnapshot.docs.map((doc) {
       return Tarea.fromMap(doc.data() as Map<String, dynamic>);
@@ -121,4 +130,44 @@ class TareaController {
       throw Exception('Tarea no encontrada');
     }
   }
+
+  Future<List<Tarea>> obtenerTareasPorEstudiante(String nicknameEstudiante) async {
+    try {
+      // Buscar al estudiante por su nickname
+      QuerySnapshot estudianteSnapshot = await _estudiantesCollection
+          .where('nickname', isEqualTo: nicknameEstudiante)
+          .get();
+
+      if (estudianteSnapshot.docs.isEmpty) {
+        print('Estudiante no encontrado');
+        throw Exception('Estudiante no encontrado');
+      }
+
+      String estudianteId = estudianteSnapshot.docs.first.id;
+      print('ID del estudiante: $estudianteId');
+
+      // Acceder a la subcolección 'tareas'
+      CollectionReference tareasEstudiante = _estudiantesCollection
+          .doc(estudianteId)
+          .collection('tareas');
+
+      QuerySnapshot tareasSnapshot = await tareasEstudiante.get();
+
+      if (tareasSnapshot.docs.isEmpty) {
+        print('No hay tareas en la subcolección');
+        return [];
+      }
+
+      print('Número de tareas encontradas: ${tareasSnapshot.docs.length}');
+
+      return tareasSnapshot.docs.map((doc) {
+        return Tarea.fromMap(doc.data() as Map<String, dynamic>);
+      }).toList();
+    } catch (e) {
+      print('Error: $e');
+      throw Exception('Error al obtener tareas: $e');
+    }
+  }
+
+
 }
