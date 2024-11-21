@@ -8,6 +8,7 @@ import 'crear_tarea.dart';
 import 'asignar_tarea_comedor.dart';
 import 'crear_menus.dart';
 import 'pedir_materiales.dart';
+import 'listas_inventario.dart'; // Importa la nueva vista
 
 class PantallaInicio extends StatefulWidget {
   final Profesor profesor;
@@ -28,7 +29,8 @@ class _PantallaInicioState extends State<PantallaInicio> {
       String nuevaContrasena = _passwordController.text;
 
       try {
-        await _profesorController.modificarContrasena(widget.profesor.nickname, nuevaContrasena);
+        await _profesorController.modificarContrasena(
+            widget.profesor.nickname, nuevaContrasena);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Contraseña modificada correctamente')),
         );
@@ -62,7 +64,8 @@ class _PantallaInicioState extends State<PantallaInicio> {
               children: [
                 const Icon(Icons.person, size: 20),
                 const SizedBox(width: 10),
-                Text('Nickname: ${widget.profesor.nickname}', style: const TextStyle(fontSize: 16)),
+                Text('Nickname: ${widget.profesor.nickname}',
+                    style: const TextStyle(fontSize: 16)),
               ],
             ),
             Row(
@@ -118,20 +121,27 @@ class _PantallaInicioState extends State<PantallaInicio> {
             const SizedBox(height: 20),
             if (widget.profesor.administrador) ...[
               _buildButton(context, 'Clases', ClasesPage(), Icons.class_),
-              _buildButton(context, 'Registrar Estudiante', RegistroEstudiante(), Icons.person_add_alt),
-              _buildButton(context, 'Registrar Profesor', RegistroProfesor(), Icons.person_add),
+              _buildButton(context, 'Registrar Estudiante',
+                  RegistroEstudiante(), Icons.person_add_alt),
+              _buildButton(context, 'Registrar Profesor', RegistroProfesor(),
+                  Icons.person_add),
               _buildButton(context, 'Crear Tarea', CrearTarea(), Icons.task),
-              _buildButton(context, 'Asignar Tarea Comedor', AsignarTareaComedor(), Icons.restaurant),
+              _buildButton(context, 'Asignar Tarea Comedor',
+                  AsignarTareaComedor(), Icons.restaurant),
               _buildButton(context, 'Crear Menú', CrearMenu(), Icons.menu_book),
+              _buildButton(context, 'Crear Listas de Inventario',
+                  CrearListasInventario(), Icons.list), // Nuevo botón
             ],
-            _buildButton(context, 'Pedir Materiales', PedirMateriales(), Icons.shopping_cart),
+            _buildButton(context, 'Pedir Materiales', PedirMateriales(),
+                Icons.shopping_cart),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildButton(BuildContext context, String text, Widget page, IconData icon) {
+  Widget _buildButton(
+      BuildContext context, String text, Widget page, IconData icon) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: ElevatedButton.icon(

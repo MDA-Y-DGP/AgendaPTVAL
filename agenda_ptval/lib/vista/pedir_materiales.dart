@@ -14,7 +14,8 @@ class PedirMateriales extends StatefulWidget {
 class _PedirMaterialesState extends State<PedirMateriales> {
   final InventarioController _inventarioController = InventarioController();
   final ClaseController _claseController = ClaseController();
-  final PedidosMaterialesController _pedidosMaterialesController = PedidosMaterialesController();
+  final PedidosMaterialesController _pedidosMaterialesController =
+      PedidosMaterialesController();
   List<Inventario> _inventarioList = [];
   Map<int, int> _pedidos = {};
   Map<int, TextEditingController> _controllers = {};
@@ -32,7 +33,10 @@ class _PedirMaterialesState extends State<PedirMateriales> {
       setState(() {
         _inventarioList = lista;
         _pedidos = {for (var item in lista) item.idObjeto: 0};
-        _controllers = {for (var item in lista) item.idObjeto: TextEditingController(text: '0')};
+        _controllers = {
+          for (var item in lista)
+            item.idObjeto: TextEditingController(text: '0')
+        };
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -64,7 +68,8 @@ class _PedirMaterialesState extends State<PedirMateriales> {
     List<Inventario> materialesPedidos = [];
 
     _pedidos.forEach((idObjeto, cantidadPedida) {
-      final inventario = _inventarioList.firstWhere((item) => item.idObjeto == idObjeto);
+      final inventario =
+          _inventarioList.firstWhere((item) => item.idObjeto == idObjeto);
       if (cantidadPedida > inventario.cantidad) {
         pedidoValido = false;
       } else if (cantidadPedida > 0) {
@@ -96,7 +101,9 @@ class _PedirMaterialesState extends State<PedirMateriales> {
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No se puede pedir más de la cantidad disponible o clase no seleccionada')),
+        SnackBar(
+            content: Text(
+                'No se puede pedir más de la cantidad disponible o clase no seleccionada')),
       );
     }
   }
@@ -163,14 +170,16 @@ class _PedirMaterialesState extends State<PedirMateriales> {
                         _pedidos[inventario.idObjeto] = cantidad;
                       });
                     } else {
-                      _controllers[inventario.idObjeto]!.text = _pedidos[inventario.idObjeto]!.toString();
+                      _controllers[inventario.idObjeto]!.text =
+                          _pedidos[inventario.idObjeto]!.toString();
                     }
                   },
                 ),
               ),
               IconButton(
                 icon: Icon(Icons.add),
-                onPressed: () => _incrementarCantidad(inventario.idObjeto, inventario.cantidad),
+                onPressed: () => _incrementarCantidad(
+                    inventario.idObjeto, inventario.cantidad),
               ),
             ],
           ),
