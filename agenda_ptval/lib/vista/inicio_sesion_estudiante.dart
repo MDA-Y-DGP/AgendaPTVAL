@@ -102,61 +102,73 @@ class _InicioSesionEstudianteState extends State<InicioSesionEstudiante> {
           imageSize = maxImageSize;
         }
 
-        if (gradoAprendizaje == 'alto') {
-          // Campo de texto normal para grado alto
-          return Center(
-            child: Form(
-              key: _formKey,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: widthFactor),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
+        return Center(
+          child: SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: widthFactor),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  FutureBuilder<String>(
+                    future: _imagenController.obtenerFotoPerfil(estudianteSeleccionado!['nickname']),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const CircularProgressIndicator();
+                      } else if (snapshot.hasError) {
+                        return const Icon(Icons.error);
+                      } else if (snapshot.hasData) {
+                        return CircleAvatar(
+                          radius: 40,
+                          backgroundImage: NetworkImage(snapshot.data!),
+                        );
+                      } else {
+                        return const Icon(Icons.error);
+                      }
+                    },
+                  ),
+                  if (gradoAprendizaje == 'alto') ...[
+                    Text(
+                      estudianteSeleccionado!['nickname']!,
+                      style: const TextStyle(fontSize: 16),
+                    ),
                     const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _passwordController,
-                      decoration: InputDecoration(
-                        labelText: 'Contraseña',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        filled: true,
-                        fillColor: Colors.white.withOpacity(0.8),
+                    Form(
+                      key: _formKey,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          TextFormField(
+                            controller: _passwordController,
+                            decoration: InputDecoration(
+                              labelText: 'Contraseña',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              filled: true,
+                              fillColor: Colors.white.withOpacity(0.8),
+                            ),
+                            obscureText: true,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Por favor ingresa tu contraseña';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 20),
+                          ElevatedButton(
+                            onPressed: _iniciarSesion,
+                            child: const Text('Iniciar Sesión'),
+                          ),
+                        ],
                       ),
-                      obscureText: true,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Por favor ingresa tu contraseña';
-                        }
-                        return null;
-                      },
                     ),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: _iniciarSesion,
-                      child: const Text('Iniciar Sesión'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        } else {
-          // Mostrar pictogramas para grado medio o bajo
-          return Center(
-            child: SingleChildScrollView(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: widthFactor),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const SizedBox(height: 16),
-                    const Text('Ingresa tu contraseña usando los pictogramas:'),
+                  ] else ...[
                     const SizedBox(height: 10),
                     Container(
                       constraints: BoxConstraints(
                         maxHeight: constraints.maxHeight * 0.4, // Limita la altura del contenedor
-                        maxWidth: constraints.maxWidth * 0.4, // Limita el ancho del contenedor
+                        maxWidth: constraints.maxWidth * 0.38, // Limita el ancho del contenedor
                       ),
                       child: LayoutBuilder(
                         builder: (context, innerConstraints) {
@@ -196,23 +208,23 @@ class _InicioSesionEstudianteState extends State<InicioSesionEstudiante> {
                       'Secuencia: $pictogramaPassword',
                       style: const TextStyle(fontSize: 16),
                     ),
-                    const SizedBox(height: 10),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        setState(() {
-                          estudianteSeleccionado = null;
-                          pictogramaPassword = '';
-                        });
-                      },
-                      icon: const Icon(Icons.arrow_back),
-                      label: const Text('Regresar'),
-                    ),
                   ],
-                ),
+                  const SizedBox(height: 10),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      setState(() {
+                        estudianteSeleccionado = null;
+                        pictogramaPassword = '';
+                      });
+                    },
+                    icon: const Icon(Icons.arrow_back),
+                    label: const Text('Regresar'),
+                  ),
+                ],
               ),
             ),
-          );
-        }
+          ),
+        );
       },
     );
   }
