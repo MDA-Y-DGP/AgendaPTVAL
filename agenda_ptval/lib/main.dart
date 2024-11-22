@@ -24,8 +24,14 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Agenda PTVAL',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+        colorScheme: ColorScheme.light(
+          primary: Colors.blueAccent,
+          secondary: Colors.orangeAccent,
+          surface: Colors.lightBlue[50]!,
+        ),
+        textTheme: const TextTheme(
+          bodyMedium: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
       ),
       home: MyHomePage(title: 'Agenda PTVAL', firestore: firestore),
     );
@@ -43,88 +49,106 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  // Navega a la pantalla de inicio de sesión del profesor
   void _navigateToProfesorLogin(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => InicioSesionProfesor()),
+      MaterialPageRoute(builder: (context) => const InicioSesionProfesor()),
     );
   }
 
-  // Navega a la pantalla de inicio de sesión del estudiante
   void _navigateToStudentLogin(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => InicioSesionEstudiante()),
+      MaterialPageRoute(builder: (context) => const InicioSesionEstudiante()),
     );
   }
 
-  // Construye el widget para la opción de profesor
-  Widget _buildProfesorOption(BuildContext context) {
+  Widget _buildOption({
+    required BuildContext context,
+    required String label,
+    required String imagePath,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
-      onTap: () => _navigateToProfesorLogin(context),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            'assets/profesor.png',
-            width: MediaQuery.of(context).size.width * 0.4,
-            height: MediaQuery.of(context).size.width * 0.4,
-            semanticLabel: 'Imagen de un profesor',
-          ),
-          const SizedBox(height: 10),
-          const Text(
-            'Profesor',
-            style: TextStyle(fontSize: 24),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Construye el widget para la opción de estudiante
-  Widget _buildEstudianteOption(BuildContext context) {
-    return GestureDetector(
-      onTap: () => _navigateToStudentLogin(context),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            'assets/estudiante.png',
-            width: MediaQuery.of(context).size.width * 0.4,
-            height: MediaQuery.of(context).size.width * 0.4,
-            semanticLabel: 'Imagen de un estudiante',
-          ),
-          const SizedBox(height: 10),
-          const Text(
-            'Estudiante',
-            style: TextStyle(fontSize: 24),
-          ),
-        ],
+      onTap: onTap,
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.4,
+        height: MediaQuery.of(context).size.width * 0.4,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 6,
+              offset: Offset(2, 3),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              imagePath,
+              width: 250,
+              height: 250,
+              semanticLabel: 'Imagen de $label',
+            ),
+            const SizedBox(height: 10),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-        centerTitle: true, // Centra el título
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        title: Text(
+          widget.title,
+          style: const TextStyle(fontSize: 28),
+        ),
+        centerTitle: true,
       ),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: Center(
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _buildProfesorOption(context),
-              SizedBox(width: screenWidth * 0.05),
-              _buildEstudianteOption(context),
-            ],
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 32.0),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildOption(
+                  context: context,
+                  label: 'Profesor',
+                  imagePath: 'assets/profesor.png',
+                  color: Colors.blueAccent,
+                  onTap: () => _navigateToProfesorLogin(context),
+                ),
+                const SizedBox(width: 20),
+                _buildOption(
+                  context: context,
+                  label: 'Estudiante',
+                  imagePath: 'assets/estudiante.png',
+                  color: Colors.orangeAccent,
+                  onTap: () => _navigateToStudentLogin(context),
+                ),
+              ],
+            ),
           ),
         ),
       ),

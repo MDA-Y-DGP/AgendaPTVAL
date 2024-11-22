@@ -22,26 +22,22 @@ class _InicioSesionState extends State<InicioSesionProfesor> {
     _profesorController = ProfesorController();
   }
 
-  // Método para iniciar sesión
   void _iniciarSesion() async {
     if (_formKey.currentState!.validate()) {
       String nickname = _nicknameController.text;
       String password = _passwordController.text;
 
       try {
-        // Verificar las credenciales en Firestore
-        final profesor = await _profesorController.verificarCredenciales(nickname, password);
-
+        final profesor =
+            await _profesorController.verificarCredenciales(nickname, password);
         if (profesor != null) {
-          // Credenciales válidas, navegar a la nueva pantalla según el rol
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => PantallaInicio(profesor: profesor),
-              ),
-            );
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PantallaInicio(profesor: profesor),
+            ),
+          );
         } else {
-          // Credenciales inválidas
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Credenciales inválidas')),
           );
@@ -54,11 +50,10 @@ class _InicioSesionState extends State<InicioSesionProfesor> {
     }
   }
 
-  // Widget para el logo y el título
   Widget _buildLogo() {
     return Column(
       children: [
-        Image.asset('assets/profesor.png', height: 150), // Imagen más pequeña
+        Image.asset('assets/profesor.png', height: 150),
         const SizedBox(height: 20),
         const Text(
           'Inicio de Sesión - Profesor',
@@ -72,7 +67,6 @@ class _InicioSesionState extends State<InicioSesionProfesor> {
     );
   }
 
-  // Widget para el formulario de inicio de sesión
   Widget _buildForm() {
     return Form(
       key: _formKey,
@@ -85,97 +79,90 @@ class _InicioSesionState extends State<InicioSesionProfesor> {
           const SizedBox(height: 20),
           _buildLoginButton(),
           const SizedBox(height: 20),
-          _buildBackButton(), // Añadir el botón de regreso
+          _buildBackButton(),
         ],
       ),
     );
   }
 
-  // Widget para el campo de nickname
   Widget _buildNicknameField() {
-    return Semantics(
-      label: 'Campo de nickname',
-      hint: 'Ingresa tu nickname',
-      child: TextFormField(
-        controller: _nicknameController,
-        decoration: InputDecoration(
-          labelText: 'Nickname',
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          filled: true,
-          fillColor: Colors.white.withOpacity(0.8),
+    return TextFormField(
+      controller: _nicknameController,
+      decoration: InputDecoration(
+        labelText: 'Nickname',
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
         ),
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return 'Por favor ingresa tu nickname';
-          }
-          return null;
-        },
+        filled: true,
+        fillColor: Theme.of(context).colorScheme.surface,
       ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Por favor ingresa tu nickname';
+        }
+        return null;
+      },
     );
   }
 
-  // Widget para el campo de contraseña
   Widget _buildPasswordField() {
-    return Semantics(
-      label: 'Campo de contraseña',
-      hint: 'Ingresa tu contraseña',
-      child: TextFormField(
-        controller: _passwordController,
-        decoration: InputDecoration(
-          labelText: 'Contraseña',
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          filled: true,
-          fillColor: Colors.white.withOpacity(0.8),
+    return TextFormField(
+      controller: _passwordController,
+      decoration: InputDecoration(
+        labelText: 'Contraseña',
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
         ),
-        obscureText: true,
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return 'Por favor ingresa tu contraseña';
-          }
-          return null;
-        },
+        filled: true,
+        fillColor: Theme.of(context).colorScheme.surface,
       ),
+      obscureText: true,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Por favor ingresa tu contraseña';
+        }
+        return null;
+      },
     );
   }
 
-  // Widget para el botón de inicio de sesión
   Widget _buildLoginButton() {
-    return Semantics(
-      label: 'Botón de inicio de sesión',
-      hint: 'Presiona para iniciar sesión',
-      child: ElevatedButton(
-        onPressed: _iniciarSesion,
-        style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
+    return ElevatedButton.icon(
+      onPressed: _iniciarSesion,
+      icon: const Icon(Icons.login),
+      label: const Text('Iniciar Sesión'),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Colors.white, // Color del texto
+        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
         ),
-        child: const Text('Iniciar Sesión'),
+        textStyle: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
 
-  // Widget para el botón de regreso
   Widget _buildBackButton() {
-    return Semantics(
-      label: 'Botón de regreso',
-      hint: 'Presiona para volver a la página anterior',
-      child: ElevatedButton.icon(
-        onPressed: () {
-          Navigator.pop(context);
-        },
-        icon: const Icon(Icons.arrow_back),
-        label: const Text('Regresar'),
-        style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
+    return ElevatedButton.icon(
+      onPressed: () {
+        Navigator.pop(context);
+      },
+      icon: const Icon(Icons.arrow_back),
+      label: const Text('Regresar'),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Colors.white, // Color del texto
+        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        textStyle: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );
@@ -184,45 +171,25 @@ class _InicioSesionState extends State<InicioSesionProfesor> {
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
-    final double padding = screenWidth * 0.1; // 10% del ancho de la pantalla
+    final double padding = screenWidth * 0.1;
 
     return Scaffold(
       appBar: AppBar(
-        leading: Semantics(
-          label: 'Botón de atrás',
-          hint: 'Vuelve a la página anterior',
-          child: IconButton(
-            icon: const Icon(Icons.arrow_back, size: 30),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-        ),
-        backgroundColor: Colors.transparent,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        title: const Text('Inicio de Sesión'),
+        centerTitle: true,
         elevation: 0,
       ),
-      body: Stack(
-        children: [
-          Center(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(horizontal: padding),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Semantics(
-                    label: 'Logo de la aplicación',
-                    child: _buildLogo(),
-                  ),
-                  const SizedBox(height: 40),
-                  Semantics(
-                    label: 'Formulario de inicio de sesión',
-                    child: _buildForm(),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+      body: SingleChildScrollView(
+        padding: EdgeInsets.symmetric(horizontal: padding),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _buildLogo(),
+            const SizedBox(height: 40),
+            _buildForm(),
+          ],
+        ),
       ),
     );
   }

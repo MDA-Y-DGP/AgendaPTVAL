@@ -272,31 +272,54 @@ class _InicioSesionEstudianteState extends State<InicioSesionEstudiante> {
   }
 
   // Muestra todas las fotos con nombres debajo
-  Widget _buildStudentGrid() {
-    return GridView.builder(
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        childAspectRatio: 0.75,
-      ),
-      itemCount: estudiantes.length,
-      itemBuilder: (context, index) {
-        final estudiante = estudiantes[index];
-        return GestureDetector(
-          onTap: () => _seleccionarEstudiante(estudiante),
-          child: Column(
-            children: [
-              const CircleAvatar(
-                radius: 40, // Hacer la imagen del perfil más pequeña
-                backgroundImage: AssetImage('assets/default_profile.png'),
-              ),
-              const SizedBox(height: 8),
-              Text(estudiante['nickname']!, style: const TextStyle(fontSize: 16)),
-            ],
-          ),
-        );
-      },
-    );
-  }
+Widget _buildStudentGrid() {
+  return GridView.builder(
+    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      crossAxisCount: 3,
+      childAspectRatio: 0.75,
+    ),
+    itemCount: estudiantes.length,
+    itemBuilder: (context, index) {
+      final estudiante = estudiantes[index];
+      return GestureDetector(
+        onTap: () => _seleccionarEstudiante(estudiante),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FutureBuilder<String>(
+              future: _imagenController.obtenerFotoPerfil(estudiante['nickname']),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const CircleAvatar(
+                    radius: 40,
+                    child: CircularProgressIndicator(),
+                  );
+                } else if (snapshot.hasError || !snapshot.hasData) {
+                  return const CircleAvatar(
+                    radius: 40,
+                    backgroundImage: AssetImage('assets/default_profile.png'),
+                  );
+                } else {
+                  return CircleAvatar(
+                    radius: 40,
+                    backgroundImage: NetworkImage(snapshot.data!),
+                  );
+                }
+              },
+            ),
+            const SizedBox(height: 8),
+            Text(
+              estudiante['nickname'] ?? 'Sin nombre',
+              style: const TextStyle(fontSize: 16),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {

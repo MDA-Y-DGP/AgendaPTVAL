@@ -1,7 +1,7 @@
-import 'package:agenda_ptval/vista/clases.dart';
 import 'package:flutter/material.dart';
 import '../modelo/profesor_modelo.dart';
 import '../controlador/profesor_controller.dart';
+import 'clases.dart';
 import 'registro_estudiante.dart';
 import 'registro_profesor.dart';
 import 'crear_tarea.dart';
@@ -44,121 +44,291 @@ class _PantallaInicioState extends State<PantallaInicio> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Inicio'),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+  Widget _buildOption({
+    required BuildContext context,
+    required String label,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 6,
+              offset: Offset(2, 3),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(8),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Icon(icon, size: 40, color: Colors.white),
+            const SizedBox(height: 5),
             Text(
-              '¡Bienvenido, ${widget.profesor.nickname}!',
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              label,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 20),
-            Row(
-              children: [
-                const Icon(Icons.person, size: 20),
-                const SizedBox(width: 10),
-                Text('Nickname: ${widget.profesor.nickname}',
-                    style: const TextStyle(fontSize: 16)),
-              ],
-            ),
-            Row(
-              children: [
-                const Icon(Icons.shield, size: 20),
-                const SizedBox(width: 10),
-                Text(
-                  'Administrador: ${widget.profesor.administrador ? "Sí" : "No"}',
-                  style: const TextStyle(fontSize: 16),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (_) => AlertDialog(
-                    title: const Text('Modificar Contraseña'),
-                    content: Form(
-                      key: _formKey,
-                      child: TextFormField(
-                        controller: _passwordController,
-                        decoration: const InputDecoration(
-                          labelText: 'Nueva Contraseña',
-                          border: OutlineInputBorder(),
-                        ),
-                        obscureText: true,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Por favor ingresa tu nueva contraseña';
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('Cancelar'),
-                      ),
-                      ElevatedButton(
-                        onPressed: _modificarContrasena,
-                        child: const Text('Guardar'),
-                      ),
-                    ],
-                  ),
-                );
-              },
-              icon: const Icon(Icons.lock),
-              label: const Text('Modificar Contraseña'),
-            ),
-            const SizedBox(height: 20),
-            if (widget.profesor.administrador) ...[
-              _buildButton(context, 'Clases', ClasesPage(), Icons.class_),
-              _buildButton(context, 'Registrar Estudiante',
-                  RegistroEstudiante(), Icons.person_add_alt),
-              _buildButton(context, 'Registrar Profesor', RegistroProfesor(),
-                  Icons.person_add),
-              _buildButton(context, 'Crear Tarea', CrearTarea(), Icons.task),
-              _buildButton(context, 'Asignar Tarea',
-                  AsignarTarea(), Icons.pending_actions),
-              _buildButton(context, 'Evaluar Tarea',
-                  EvaluarTarea(), Icons.thumb_up_alt),
-              _buildButton(context, 'Crear Menú', CrearMenu(), Icons.menu_book),
-              _buildButton(context, 'Crear Listas de Inventario',
-                  CrearListasInventario(), Icons.list), // Nuevo botón
-            ],
-            _buildButton(context, 'Pedir Materiales', PedirMateriales(),
-                Icons.shopping_cart),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildButton(
-      BuildContext context, String text, Widget page, IconData icon) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: ElevatedButton.icon(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => page),
+
+  Widget _buildWelcomeText() {
+    return Text(
+      '¡Bienvenido, ${widget.profesor.nickname}!',
+      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+    );
+  }
+
+  Widget _buildUserInfo() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(Icons.person, size: 20),
+            const SizedBox(width: 10),
+            Text(
+              'Nickname: ${widget.profesor.nickname}',
+              style: const TextStyle(fontSize: 16),
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            const Icon(Icons.shield, size: 20),
+            const SizedBox(width: 10),
+            Text(
+              'Administrador: ${widget.profesor.administrador ? "Sí" : "No"}',
+              style: const TextStyle(fontSize: 16),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildChangePasswordButton() {
+    return ElevatedButton.icon(
+      onPressed: () {
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text('Modificar Contraseña'),
+            content: Form(
+              key: _formKey,
+              child: TextFormField(
+                controller: _passwordController,
+                decoration: const InputDecoration(
+                  labelText: 'Nueva Contraseña',
+                  border: OutlineInputBorder(),
+                ),
+                obscureText: true,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Por favor ingresa tu nueva contraseña';
+                  }
+                  return null;
+                },
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancelar'),
+              ),
+              ElevatedButton(
+                onPressed: _modificarContrasena,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Colors.white, // Color del texto
+                ),
+                child: const Text('Guardar'),
+              ),
+            ],
+          ),
+        );
+      },
+      icon: const Icon(Icons.lock),
+      label: const Text('Modificar Contraseña'),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Colors.white, // Color del texto
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+        textStyle: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOptionsGrid() {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+        maxCrossAxisExtent: 150,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+      ),
+      itemCount: widget.profesor.administrador ? 9 : 1,
+      itemBuilder: (context, index) {
+        if (widget.profesor.administrador) {
+          switch (index) {
+            case 0:
+              return _buildOption(
+                context: context,
+                label: 'Clases',
+                icon: Icons.class_,
+                color: Theme.of(context).colorScheme.primary,
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ClasesPage()),
+                ),
+              );
+            case 1:
+              return _buildOption(
+                context: context,
+                label: 'Registrar Estudiante',
+                icon: Icons.person_add_alt,
+                color: Theme.of(context).colorScheme.primary,
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => RegistroEstudiante()),
+                ),
+              );
+            case 2:
+              return _buildOption(
+                context: context,
+                label: 'Registrar Profesor',
+                icon: Icons.person_add,
+                color: Theme.of(context).colorScheme.primary,
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => RegistroProfesor()),
+                ),
+              );
+            case 3:
+              return _buildOption(
+                context: context,
+                label: 'Crear Tarea',
+                icon: Icons.task,
+                color: Theme.of(context).colorScheme.primary,
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => CrearTarea()),
+                ),
+              );
+            case 4:
+              return _buildOption(
+                context: context,
+                label: 'Asignar Tarea',
+                icon: Icons.pending_actions,
+                color: Theme.of(context).colorScheme.primary,
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AsignarTarea()),
+                ),
+              );
+            case 5:
+              return _buildOption(
+                context: context,
+                label: 'Evaluar Tarea',
+                icon: Icons.thumb_up_alt,
+                color: Theme.of(context).colorScheme.primary,
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => EvaluarTarea()),
+                ),
+              );
+            case 6:
+              return _buildOption(
+                context: context,
+                label: 'Crear Menú',
+                icon: Icons.menu_book,
+                color: Theme.of(context).colorScheme.primary,
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => CrearMenu()),
+                ),
+              );
+            case 7:
+              return _buildOption(
+                context: context,
+                label: 'Crear Listas de Inventario',
+                icon: Icons.list,
+                color: Theme.of(context).colorScheme.primary,
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => CrearListasInventario()),
+                ),
+              );
+            case 8:
+              return _buildOption(
+                context: context,
+                label: 'Pedir Materiales',
+                icon: Icons.shopping_cart,
+                color: Theme.of(context).colorScheme.secondary,
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => PedirMateriales()),
+                ),
+              );
+            default:
+              return Container();
+          }
+        } else {
+          return _buildOption(
+            context: context,
+            label: 'Pedir Materiales',
+            icon: Icons.shopping_cart,
+            color: Theme.of(context).colorScheme.secondary,
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => PedirMateriales()),
+            ),
           );
-        },
-        icon: Icon(icon),
-        label: Text(text),
-        style: ElevatedButton.styleFrom(
-          minimumSize: const Size(double.infinity, 50),
-          textStyle: const TextStyle(fontSize: 16),
+        }
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+      title: const Text('Inicio'),
+      centerTitle: true,
+      backgroundColor: Theme.of(context).colorScheme.primary,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildWelcomeText(),
+            const SizedBox(height: 20),
+            _buildUserInfo(),
+            const SizedBox(height: 20),
+            _buildChangePasswordButton(),
+            const SizedBox(height: 20),
+            _buildOptionsGrid(),
+          ],
         ),
       ),
     );
