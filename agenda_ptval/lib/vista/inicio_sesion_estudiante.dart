@@ -192,7 +192,7 @@ class _InicioSesionEstudianteState extends State<InicioSesionEstudiante> {
                               return GestureDetector(
                                 onTap: () => _agregarDigitoPictograma(pictogramaNumero),
                                 child: Image.asset(
-                                  'assets/pictograma$pictogramaNumero.png',
+                                  'assets/pictograma_contrasena$pictogramaNumero.png',
                                   fit: BoxFit.contain,
                                   width: imageSize,
                                   height: imageSize,

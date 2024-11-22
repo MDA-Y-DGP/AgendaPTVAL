@@ -21,7 +21,6 @@ class _EvaluarTareaState extends State<EvaluarTarea> {
   int? _selectedTarea;
   List<Estudiante> _estudiantes = [];
   List<Tarea> _tareas = [];
-  bool _isLoading = false;
 
   final TextEditingController _evaluacionController = TextEditingController();
 
@@ -161,24 +160,20 @@ class _EvaluarTareaState extends State<EvaluarTarea> {
 
   void _fetchEstudiantesPorClase(String claseId) async {
     setState(() {
-      _isLoading = true;
     });
     List<Estudiante> estudiantes =
     await _estudianteController.obtenerEstudiantesPorClase(claseId);
     setState(() {
       _estudiantes = estudiantes;
-      _isLoading = false;
     });
   }
 
   void _fetchTareasPorEstudiante(String estudianteId) async {
     setState(() {
-      _isLoading = true;
     });
     List<Tarea> tareas = await _tareaController.obtenerTareasPorEstudiante(estudianteId);
     setState(() {
       _tareas = tareas;
-      _isLoading = false;
     });
   }
 

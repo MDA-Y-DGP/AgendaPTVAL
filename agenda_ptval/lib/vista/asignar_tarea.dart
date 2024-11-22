@@ -21,7 +21,6 @@ class _AsignarTareaState extends State<AsignarTarea> {
   String? _selectedClase;
   String? _selectedEstudiante;
   List<Estudiante> _estudiantes = [];
-  bool _isLoading = false;
 
   @override
   void initState() {
@@ -216,12 +215,10 @@ class _AsignarTareaState extends State<AsignarTarea> {
 
   void _fetchEstudiantesPorClase(String claseId) async {
     setState(() {
-      _isLoading = true;
     });
     List<Estudiante> estudiantes = await _estudianteController.obtenerEstudiantesPorClase(claseId);
     setState(() {
       _estudiantes = estudiantes;
-      _isLoading = false;
     });
   }
 
