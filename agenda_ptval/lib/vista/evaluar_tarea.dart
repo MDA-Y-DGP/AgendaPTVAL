@@ -100,7 +100,7 @@ class _EvaluarTareaState extends State<EvaluarTarea> {
         setState(() {
           _selectedEstudiante = newValue;
           _selectedTarea = null;
-          _fetchTareasPorEstudiante(newValue!);
+          _fetchTareasPorEstudianteCompletadas(newValue!);
         });
       },
       items: _estudiantes.map((Estudiante estudiante) {
@@ -146,10 +146,14 @@ class _EvaluarTareaState extends State<EvaluarTarea> {
             labelText: 'Escribe la evaluación',
             border: OutlineInputBorder(),
           ),
+          onChanged: (value) {
+            setState(() {});
+          },
         ),
+
         const SizedBox(height: 20),
         ElevatedButton(
-          onPressed: _evaluacionController.text.isEmpty
+          onPressed: _evaluacionController.text.trim().isEmpty
               ? null
               : _evaluarTareaSeleccionada,
           child: Text('Confirmar Evaluación'),
@@ -168,10 +172,10 @@ class _EvaluarTareaState extends State<EvaluarTarea> {
     });
   }
 
-  void _fetchTareasPorEstudiante(String estudianteId) async {
+  void _fetchTareasPorEstudianteCompletadas(String estudianteId) async {
     setState(() {
     });
-    List<Tarea> tareas = await _tareaController.obtenerTareasPorEstudiante(estudianteId);
+    List<Tarea> tareas = await _tareaController.obtenerTareasCompletadas(estudianteId);
     setState(() {
       _tareas = tareas;
     });
@@ -183,6 +187,7 @@ class _EvaluarTareaState extends State<EvaluarTarea> {
         await _tareaController.evaluarTarea(
           _selectedTarea!,
           _evaluacionController.text,
+          _selectedEstudiante!
         );
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Tarea evaluada correctamente')),
@@ -192,6 +197,7 @@ class _EvaluarTareaState extends State<EvaluarTarea> {
           _selectedTarea = null;
         });
       } catch (e) {
+        print("Error al evaluar la tarea: $e");
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error al evaluar la tarea: $e')),
         );
