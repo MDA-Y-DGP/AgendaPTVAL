@@ -274,5 +274,34 @@ class TareaController {
     return tareasCompletadas;
   }
 
+  Future<void> borrarTarea(int idTarea) async {
+    try {
+      // Borrar la tarea de la colección principal
+      QuerySnapshot tareaSnapshot = await _tareasCollection
+          .where('idTarea', isEqualTo: idTarea)
+          .get();
 
+      if (tareaSnapshot.docs.isNotEmpty) {
+        await tareaSnapshot.docs.first.reference.delete();
+      }
+
+      // Borrar la tarea de la colección tareasAsignadas de los estudiantes
+      QuerySnapshot estudiantesSnapshot = await _estudiantesCollection.get();
+      for (var estudianteDoc in estudiantesSnapshot.docs) {
+        CollectionReference tareasAsignadasRef = _estudiantesCollection
+            .doc(estudianteDoc.id)
+            .collection('tareasAsignadas');
+
+        QuerySnapshot tareasAsignadasSnapshot = await tareasAsignadasRef
+            .where('tarea.idTarea', isEqualTo: idTarea)
+            .get();
+
+        for (var tareaAsignadaDoc in tareasAsignadasSnapshot.docs) {
+          await tareaAsignadaDoc.reference.delete();
+        }
+      }
+    } catch (e) {
+      throw Exception('Error al borrar la tarea: $e');
+    }
+  }
 }

@@ -118,19 +118,43 @@ class _ClasesPageState extends State<ClasesPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Gestión de Clases'),
+        backgroundColor: Theme.of(context).colorScheme.primary,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+            ElevatedButton(
+              onPressed: _navegarAgregarClase,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                textStyle: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white, // Color del texto
+                ),
+              ),
+              child: const Text('Agregar Clase', style: TextStyle(color: Colors.white)),
+            ),
+            const SizedBox(height: 20),
             Expanded(
               child: ListView.builder(
                 itemCount: clases.length,
                 itemBuilder: (context, index) {
                   final clase = clases[index];
                   return Card(
+                    color: Theme.of(context).colorScheme.surface, // Fondo de la tarjeta
                     child: ListTile(
-                      title: Text(clase.nombre),
+                      title: Text(
+                        clase.nombre,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface, // Color del texto
+                        ),
+                      ),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -148,16 +172,6 @@ class _ClasesPageState extends State<ClasesPage> {
                   );
                 },
               ),
-            ),
-            ElevatedButton(
-              onPressed: _navegarAgregarClase,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: const Text('Agregar Clase'),
             ),
           ],
         ),

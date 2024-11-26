@@ -4,12 +4,10 @@ import '../controlador/profesor_controller.dart';
 import 'clases.dart';
 import 'registro_estudiante.dart';
 import 'registro_profesor.dart';
-import 'crear_tarea.dart';
-import 'asignar_tarea.dart';
 import 'crear_menus.dart';
 import 'pedir_materiales.dart';
 import 'listas_inventario.dart';
-import 'evaluar_tarea.dart';
+import 'tareas.dart'; 
 
 class PantallaInicio extends StatefulWidget {
   final Profesor profesor;
@@ -186,7 +184,7 @@ class _PantallaInicioState extends State<PantallaInicio> {
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
       ),
-      itemCount: widget.profesor.administrador ? 9 : 1,
+      itemCount: widget.profesor.administrador ? 10 : 1,
       itemBuilder: (context, index) {
         if (widget.profesor.administrador) {
           switch (index) {
@@ -226,37 +224,15 @@ class _PantallaInicioState extends State<PantallaInicio> {
             case 3:
               return _buildOption(
                 context: context,
-                label: 'Crear Tarea',
-                icon: Icons.task,
+                label: 'Tareas',
+                icon: Icons.assignment,
                 color: Theme.of(context).colorScheme.primary,
                 onTap: () => Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => CrearTarea()),
+                  MaterialPageRoute(builder: (context) => TareasPage()),
                 ),
               );
             case 4:
-              return _buildOption(
-                context: context,
-                label: 'Asignar Tarea',
-                icon: Icons.pending_actions,
-                color: Theme.of(context).colorScheme.primary,
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => AsignarTarea()),
-                ),
-              );
-            case 5:
-              return _buildOption(
-                context: context,
-                label: 'Evaluar Tarea',
-                icon: Icons.thumb_up_alt,
-                color: Theme.of(context).colorScheme.primary,
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => EvaluarTarea()),
-                ),
-              );
-            case 6:
               return _buildOption(
                 context: context,
                 label: 'Crear Menú',
@@ -267,7 +243,7 @@ class _PantallaInicioState extends State<PantallaInicio> {
                   MaterialPageRoute(builder: (context) => CrearMenu()),
                 ),
               );
-            case 7:
+            case 5:
               return _buildOption(
                 context: context,
                 label: 'Crear Listas de Inventario',
@@ -278,7 +254,7 @@ class _PantallaInicioState extends State<PantallaInicio> {
                   MaterialPageRoute(builder: (context) => CrearListasInventario()),
                 ),
               );
-            case 8:
+            case 6:
               return _buildOption(
                 context: context,
                 label: 'Pedir Materiales',
@@ -315,7 +291,7 @@ class _PantallaInicioState extends State<PantallaInicio> {
       title: const Text('Inicio'),
       centerTitle: true,
       backgroundColor: Theme.of(context).colorScheme.primary,
-      ),
+    ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(

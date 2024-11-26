@@ -54,40 +54,50 @@ class ClaseController {
   }
 
   /// Método para actualizar el nombre de una clase.
-/// 
-/// [idClase] es el identificador único de la clase a actualizar.
-/// [nuevoNombre] es el nuevo nombre que se asignará.
-Future<void> actualizarClase(int idClase, String nuevoNombre) async {
-  try {
-    QuerySnapshot snapshot = await _firestore
-        .collection('clases')
-        .where('id_clase', isEqualTo: idClase)
-        .get();
+  /// 
+  /// [idClase] es el identificador único de la clase a actualizar.
+  /// [nuevoNombre] es el nuevo nombre que se asignará.
+  Future<void> actualizarClase(int idClase, String nuevoNombre) async {
+    try {
+      QuerySnapshot snapshot = await _firestore
+          .collection('clases')
+          .where('id_clase', isEqualTo: idClase)
+          .get();
 
-    if (snapshot.docs.isNotEmpty) {
-      await snapshot.docs.first.reference.update({'nombre': nuevoNombre});
+      if (snapshot.docs.isNotEmpty) {
+        await snapshot.docs.first.reference.update({'nombre': nuevoNombre});
+      }
+    } catch (e) {
+      throw Exception('Error al actualizar la clase: $e');
     }
-  } catch (e) {
-    throw Exception('Error al actualizar la clase: $e');
   }
-}
 
-/// Método para borrar una clase.
-/// 
-/// [idClase] es el identificador único de la clase que se quiere eliminar.
-Future<void> borrarClase(int idClase) async {
-  try {
-    QuerySnapshot snapshot = await _firestore
-        .collection('clases')
-        .where('id_clase', isEqualTo: idClase)
-        .get();
+  /// Método para borrar una clase.
+  /// 
+  /// [idClase] es el identificador único de la clase que se quiere eliminar.
+  Future<void> borrarClase(int idClase) async {
+    try {
+      QuerySnapshot snapshot = await _firestore
+          .collection('clases')
+          .where('id_clase', isEqualTo: idClase)
+          .get();
 
-    if (snapshot.docs.isNotEmpty) {
-      await snapshot.docs.first.reference.delete();
+      if (snapshot.docs.isNotEmpty) {
+        // Borrar la clase
+        await snapshot.docs.first.reference.delete();
+
+        // Actualizar los alumnos que pertenecen a esta clase
+        QuerySnapshot alumnosSnapshot = await _firestore
+            .collection('estudiantes')
+            .where('id_clase', isEqualTo: idClase)
+            .get();
+
+        for (var doc in alumnosSnapshot.docs) {
+          await doc.reference.update({'id_clase': null});
+        }
+      }
+    } catch (e) {
+      throw Exception('Error al borrar la clase: $e');
     }
-  } catch (e) {
-    throw Exception('Error al borrar la clase: $e');
   }
-}
-
 }
