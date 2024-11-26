@@ -28,7 +28,8 @@ class _EvaluarTareaState extends State<EvaluarTarea> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Evaluar Tarea'),
+        title: const Text('Evaluar Tarea'),
+        backgroundColor: Theme.of(context).colorScheme.primary,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -53,14 +54,14 @@ class _EvaluarTareaState extends State<EvaluarTarea> {
       future: _claseController.obtenerClases(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          return Center(child: Text('Error al cargar clases'));
+          return const Center(child: Text('Error al cargar clases'));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Center(child: Text('No hay clases disponibles'));
+          return const Center(child: Text('No hay clases disponibles'));
         } else {
           return DropdownButtonFormField<String>(
-            decoration: InputDecoration(
+            decoration:const InputDecoration(
               labelText: 'Selecciona una clase',
               border: OutlineInputBorder(),
             ),
@@ -89,9 +90,9 @@ class _EvaluarTareaState extends State<EvaluarTarea> {
 
   Widget _buildEstudiantesDropdown() {
     return _estudiantes.isEmpty
-        ? Center(child: Text('No hay estudiantes disponibles'))
+        ? const Center(child: Text('No hay estudiantes disponibles'))
         : DropdownButtonFormField<String>(
-      decoration: InputDecoration(
+      decoration:const InputDecoration(
         labelText: 'Selecciona un estudiante',
         border: OutlineInputBorder(),
       ),
@@ -114,9 +115,9 @@ class _EvaluarTareaState extends State<EvaluarTarea> {
 
   Widget _buildTareasDropdown() {
     return _tareas.isEmpty
-        ? Center(child: Text('No hay tareas asignadas'))
+        ?const Center(child: Text('No hay tareas asignadas'))
         : DropdownButtonFormField<int>(
-      decoration: InputDecoration(
+      decoration:const InputDecoration(
         labelText: 'Selecciona una tarea',
         border: OutlineInputBorder(),
       ),
@@ -142,7 +143,7 @@ class _EvaluarTareaState extends State<EvaluarTarea> {
         TextField(
           controller: _evaluacionController,
           maxLines: 4,
-          decoration: InputDecoration(
+          decoration:const InputDecoration(
             labelText: 'Escribe la evaluación',
             border: OutlineInputBorder(),
           ),
@@ -150,13 +151,24 @@ class _EvaluarTareaState extends State<EvaluarTarea> {
             setState(() {});
           },
         ),
-
         const SizedBox(height: 20),
         ElevatedButton(
           onPressed: _evaluacionController.text.trim().isEmpty
               ? null
               : _evaluarTareaSeleccionada,
-          child: Text('Confirmar Evaluación'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            textStyle: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.white, // Color del texto
+            ),
+          ),
+          child: const Text('Confirmar Evaluación', style: TextStyle(color: Colors.white)),
         ),
       ],
     );
@@ -190,14 +202,13 @@ class _EvaluarTareaState extends State<EvaluarTarea> {
           _selectedEstudiante!
         );
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Tarea evaluada correctamente')),
+          const SnackBar(content: Text('Tarea evaluada correctamente')),
         );
         setState(() {
           _evaluacionController.clear();
           _selectedTarea = null;
         });
       } catch (e) {
-        print("Error al evaluar la tarea: $e");
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error al evaluar la tarea: $e')),
         );

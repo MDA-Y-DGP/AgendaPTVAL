@@ -188,6 +188,7 @@ class _RegistroEstudianteState extends State<RegistroEstudiante> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Registro de Estudiante'),
+        backgroundColor: Theme.of(context).colorScheme.primary,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -252,11 +253,19 @@ class _RegistroEstudianteState extends State<RegistroEstudiante> {
                     );
                   }
                 },
-                child: const Text('Registrar Estudiante'),
                 style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  textStyle: const TextStyle(fontSize: 18),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  textStyle: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white, // Color del texto
+                  ),
                 ),
+                child: const Text('Registrar Estudiante', style: TextStyle(color: Colors.white)),
               ),
             ],
           ),

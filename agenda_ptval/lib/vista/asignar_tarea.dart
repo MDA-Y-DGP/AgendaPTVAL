@@ -31,7 +31,8 @@ class _AsignarTareaState extends State<AsignarTarea> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Asignar Tarea'),
+        title: const Text('Asignar Tarea'),
+        backgroundColor: Theme.of(context).colorScheme.primary,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -113,7 +114,19 @@ class _AsignarTareaState extends State<AsignarTarea> {
           onPressed: _selectedClase == null || _selectedTarea == null || _selectedEstudiante == null
               ? null
               : asignarTarea,
-          child: Text('Asignar Tarea de $tipo'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            textStyle: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.white, // Color del texto
+            ),
+          ),
+          child: Text('Asignar Tarea de $tipo', style: TextStyle(color: Colors.white)),
         ),
       ],
     );

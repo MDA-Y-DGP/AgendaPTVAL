@@ -87,6 +87,12 @@ class _CrearListasInventarioState extends State<CrearListasInventario> {
                 });
                 Navigator.pop(context);
               },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                textStyle: const TextStyle(
+                  color: Colors.white,
+                ),
+              ),
               child: Text('Guardar'),
             ),
           ],
@@ -100,6 +106,7 @@ class _CrearListasInventarioState extends State<CrearListasInventario> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Listas de Inventario'),
+        backgroundColor: Theme.of(context).colorScheme.primary,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -139,7 +146,8 @@ class _CrearListasInventarioState extends State<CrearListasInventario> {
           ).then((_) => _cargarInventario());
         },
         label: Text('Agregar Material'),
-        tooltip: 'Agregar Material',
+        icon: Icon(Icons.add),
+        backgroundColor: Theme.of(context).colorScheme.primary,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );

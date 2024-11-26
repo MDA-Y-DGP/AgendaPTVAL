@@ -92,6 +92,7 @@ class _CrearMenuState extends State<CrearMenu> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Crear Menú'),
+        backgroundColor: Theme.of(context).colorScheme.primary,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -139,11 +140,19 @@ class _CrearMenuState extends State<CrearMenu> {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _crearMenu,
-                child: const Text('Crear Menú'),
                 style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  textStyle: const TextStyle(fontSize: 18),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  textStyle: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white, // Color del texto
+                  ),
                 ),
+                child: const Text('Crear Menú', style: TextStyle(color: Colors.white)),
               ),
             ],
           ),

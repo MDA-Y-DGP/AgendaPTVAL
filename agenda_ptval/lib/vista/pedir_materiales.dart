@@ -147,41 +147,44 @@ class _PedirMaterialesState extends State<PedirMateriales> {
       itemCount: _inventarioList.length,
       itemBuilder: (context, index) {
         final inventario = _inventarioList[index];
-        return ListTile(
-          title: Text(inventario.nombre),
-          subtitle: Text('Cantidad disponible: ${inventario.cantidad}'),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                icon: Icon(Icons.remove),
-                onPressed: () => _decrementarCantidad(inventario.idObjeto),
-              ),
-              SizedBox(
-                width: 40,
-                child: TextField(
-                  keyboardType: TextInputType.number,
-                  textAlign: TextAlign.center,
-                  controller: _controllers[inventario.idObjeto],
-                  onChanged: (value) {
-                    int cantidad = int.tryParse(value) ?? 0;
-                    if (cantidad >= 0 && cantidad <= inventario.cantidad) {
-                      setState(() {
-                        _pedidos[inventario.idObjeto] = cantidad;
-                      });
-                    } else {
-                      _controllers[inventario.idObjeto]!.text =
-                          _pedidos[inventario.idObjeto]!.toString();
-                    }
-                  },
+        return Card(
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          child: ListTile(
+            title: Text(inventario.nombre),
+            subtitle: Text('Cantidad disponible: ${inventario.cantidad}'),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.remove),
+                  onPressed: () => _decrementarCantidad(inventario.idObjeto),
                 ),
-              ),
-              IconButton(
-                icon: Icon(Icons.add),
-                onPressed: () => _incrementarCantidad(
-                    inventario.idObjeto, inventario.cantidad),
-              ),
-            ],
+                SizedBox(
+                  width: 40,
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    textAlign: TextAlign.center,
+                    controller: _controllers[inventario.idObjeto],
+                    onChanged: (value) {
+                      int cantidad = int.tryParse(value) ?? 0;
+                      if (cantidad >= 0 && cantidad <= inventario.cantidad) {
+                        setState(() {
+                          _pedidos[inventario.idObjeto] = cantidad;
+                        });
+                      } else {
+                        _controllers[inventario.idObjeto]!.text =
+                            _pedidos[inventario.idObjeto]!.toString();
+                      }
+                    },
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.add),
+                  onPressed: () => _incrementarCantidad(
+                      inventario.idObjeto, inventario.cantidad),
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -193,6 +196,7 @@ class _PedirMaterialesState extends State<PedirMateriales> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Pedir Materiales'),
+        backgroundColor: Theme.of(context).colorScheme.primary,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -201,9 +205,22 @@ class _PedirMaterialesState extends State<PedirMateriales> {
             _buildClasesDropdown(),
             const SizedBox(height: 20),
             Expanded(child: _buildInventarioList()),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _pedirMateriales,
-              child: Text('Pedir Materiales'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                textStyle: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white, // Color del texto
+                ),
+              ),
+              child: Text('Pedir Materiales', style: TextStyle(color: Colors.white)),
             ),
           ],
         ),

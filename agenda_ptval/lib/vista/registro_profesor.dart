@@ -36,7 +36,7 @@ class _RegistroProfesorState extends State<RegistroProfesor> {
       try {
         await _controller.registrarProfesor(nuevoProfesor);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Profesor registrado con éxito!')),
+         const SnackBar(content: Text('Profesor registrado con éxito!')),
         );
         Navigator.pop(context); // Volver a la página anterior
       } catch (e) {
@@ -69,6 +69,7 @@ class _RegistroProfesorState extends State<RegistroProfesor> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Registro de Profesor'),
+        backgroundColor: Theme.of(context).colorScheme.primary,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -111,11 +112,19 @@ class _RegistroProfesorState extends State<RegistroProfesor> {
                     );
                   }
                 },
-                child: const Text('Registrar Profesor'),
                 style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  textStyle: const TextStyle(fontSize: 18),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  textStyle: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white, // Color del texto
+                  ),
                 ),
+                child: const Text('Registrar Profesor', style: TextStyle(color: Colors.white)),
               ),
             ],
           ),
