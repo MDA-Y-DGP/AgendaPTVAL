@@ -86,7 +86,8 @@ class _AgregarMaterialState extends State<AgregarMaterial> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Agregar Material'),
+        title: const Text('Agregar Material'),
+        backgroundColor: Theme.of(context).colorScheme.primary,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -96,7 +97,10 @@ class _AgregarMaterialState extends State<AgregarMaterial> {
             children: [
               TextFormField(
                 controller: _nombreController,
-                decoration: InputDecoration(labelText: 'Nombre'),
+                decoration: InputDecoration(
+                  labelText: 'Nombre',
+                  border: OutlineInputBorder(),
+                ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Por favor ingresa el nombre';
@@ -104,9 +108,13 @@ class _AgregarMaterialState extends State<AgregarMaterial> {
                   return null;
                 },
               ),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _cantidadController,
-                decoration: InputDecoration(labelText: 'Cantidad'),
+                decoration: InputDecoration(
+                  labelText: 'Cantidad',
+                  border: OutlineInputBorder(),
+                ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -118,19 +126,44 @@ class _AgregarMaterialState extends State<AgregarMaterial> {
                   return null;
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _seleccionarImagen,
-                child: Text('Seleccionar Imagen'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  textStyle: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white, // Color del texto
+                  ),
+                ),
+                child: const Text('Seleccionar Imagen', style: TextStyle(color: Colors.white)),
               ),
+              const SizedBox(height: 20),
               if (_imagen != null)
                 Image.file(_imagen!, height: 100)
               else if (_imagenBytes != null)
                 Image.memory(_imagenBytes!, height: 100),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _agregarMaterial,
-                child: Text('Agregar Material'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  textStyle: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white, // Color del texto
+                  ),
+                ),
+                child: const Text('Agregar Material', style: TextStyle(color: Colors.white)),
               ),
             ],
           ),
