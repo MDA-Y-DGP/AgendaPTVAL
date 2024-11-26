@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../controlador/estudiante_controller.dart';
 import 'realizar_comanda.dart'; // Importa la página de realizar comanda
+import 'realizar_tarea_inventario.dart'; // Importa la página de realizar tarea de inventario
 
 class PaginaPrincipalEstudiante extends StatefulWidget {
   final String nickname;
@@ -37,6 +38,13 @@ class _PaginaPrincipalEstudianteState extends State<PaginaPrincipalEstudiante> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => RealizarComanda()),
+    );
+  }
+
+  void _navegarARealizarTareaInventario() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => RealizarTareaInventario()),
     );
   }
 
@@ -94,6 +102,13 @@ class _PaginaPrincipalEstudianteState extends State<PaginaPrincipalEstudiante> {
               child: Text('Realizar Comanda'),
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ElevatedButton(
+              onPressed: _navegarARealizarTareaInventario,
+              child: Text('Realizar Tarea Inventario'),
+            ),
+          )
         ],
       ),
     );
