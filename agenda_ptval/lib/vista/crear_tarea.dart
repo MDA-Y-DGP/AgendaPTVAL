@@ -37,11 +37,52 @@ class _CrearTareaState extends State<CrearTarea> {
           key: _formKey,
           child: Column(
             children: [
-              _buildTextField(_tituloController, 'Título', 'Por favor ingresa un título'),
+              TextFormField(
+                controller: _tituloController,
+                decoration: InputDecoration(
+                  labelText: 'Título',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Por favor ingresa un título';
+                  }
+                  return null;
+                },
+              ),
               const SizedBox(height: 16),
-              _buildTextField(_descripcionController, 'Descripción', 'Por favor ingresa una descripción'),
+              TextFormField(
+                controller: _descripcionController,
+                decoration: InputDecoration(
+                  labelText: 'Descripción',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Por favor ingresa una descripción';
+                  }
+                  return null;
+                },
+              ),
               const SizedBox(height: 16),
-              _buildDropdownButtonFormField(),
+              DropdownButtonFormField<String>(
+                value: _tipo,
+                decoration: InputDecoration(
+                  labelText: 'Tipo de Tarea',
+                  border: OutlineInputBorder(),
+                ),
+                items: ['comedor', 'por pasos', 'inventario'].map((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _tipo = newValue!;
+                  });
+                },
+              ),
               const SizedBox(height: 16),
               if (_tipo == 'por pasos') ...[
                 _buildPasosList(),
@@ -49,49 +90,34 @@ class _CrearTareaState extends State<CrearTarea> {
                 const SizedBox(height: 10),
                 _buildAddPasoButton(),
               ],
-              const SizedBox(height: 16),
-              _buildCrearTareaButton(),
+              ElevatedButton(
+                onPressed: () async {
+                  if (_formKey.currentState!.validate()) {
+
+                    if (_tipo == 'por pasos') {
+                      for (var i = 0; i < _pasos.length; i++) {
+                        var paso = _pasos[i];
+                        if (paso['urlMedia'] == null &&
+                            (paso['mediaFile'] != null || paso['mediaBytes'] != null)) {
+                          String? urlMedia = await _subirImagenPaso(
+                              paso['mediaFile'], paso['mediaBytes'], i);
+                          paso['urlMedia'] = urlMedia;
+                        }
+                      }
+                    }
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Tarea creada correctamente')),
+                    );
+                    Navigator.pop(context);
+                  }
+                },
+                child: const Text('Crear Tarea'),
+              ),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildTextField(TextEditingController controller, String labelText, String validationMessage) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: labelText,
-        border: OutlineInputBorder(),
-      ),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return validationMessage;
-        }
-        return null;
-      },
-    );
-  }
-
-  Widget _buildDropdownButtonFormField() {
-    return DropdownButtonFormField<String>(
-      value: _tipo,
-      decoration: InputDecoration(
-        labelText: 'Tipo de Tarea',
-        border: OutlineInputBorder(),
-      ),
-      items: ['comedor', 'por pasos', 'inventario'].map((String value) {
-        return DropdownMenuItem<String>(
-          value: value,
-          child: Text(value),
-        );
-      }).toList(),
-      onChanged: (String? newValue) {
-        setState(() {
-          _tipo = newValue!;
-        });
-      },
     );
   }
 
@@ -137,10 +163,10 @@ class _CrearTareaState extends State<CrearTarea> {
     return ElevatedButton(
       onPressed: () async {
         if (_nuevoPasoController.text.isNotEmpty) {
-          String? urlMedia;
-          if (_mediaFile != null || _mediaBytes != null) {
-            urlMedia = await _subirImagenPaso(_mediaFile, _mediaBytes, _pasos.length);
-          }
+          String? urlMedia = _mediaFile != null || _mediaBytes != null
+              ? await _subirImagenPaso(_mediaFile, _mediaBytes, _pasos.length)
+              : null;
+
           setState(() {
             _pasos.add({
               'texto': _nuevoPasoController.text,
@@ -156,33 +182,6 @@ class _CrearTareaState extends State<CrearTarea> {
         }
       },
       child: const Text('Agregar Paso'),
-    );
-  }
-
-  Widget _buildCrearTareaButton() {
-    return ElevatedButton(
-      onPressed: () async {
-        if (_formKey.currentState!.validate()) {
-
-          if (_tipo == 'por pasos') {
-            for (var i = 0; i < _pasos.length; i++) {
-              var paso = _pasos[i];
-              if (paso['urlMedia'] == null &&
-                  (paso['mediaFile'] != null || paso['mediaBytes'] != null)) {
-                String? urlMedia = await _subirImagenPaso(
-                    paso['mediaFile'], paso['mediaBytes'], i);
-                paso['urlMedia'] = urlMedia;
-              }
-            }
-          }
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Tarea creada correctamente')),
-          );
-          Navigator.pop(context);
-        }
-      },
-      child: const Text('Crear Tarea'),
     );
   }
 
