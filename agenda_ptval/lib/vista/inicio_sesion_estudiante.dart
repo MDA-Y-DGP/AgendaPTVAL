@@ -325,10 +325,13 @@ Widget _buildStudentGrid() {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.primary,
         title: const Text('Inicio de Sesión - Estudiante'),
+        centerTitle: true,
+        elevation: 0,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(26.0),
         child: estudianteSeleccionado == null
             ? _buildStudentGrid()
             : SingleChildScrollView(

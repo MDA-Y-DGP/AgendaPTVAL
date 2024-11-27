@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firebase_options.dart';
 import 'vista/inicio_sesion_profesor.dart';
 import 'vista/inicio_sesion_estudiante.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';  // Importar la librería
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -11,7 +12,14 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
-  runApp(MyApp(firestore: firestore));
+
+  // Inicializar la aplicación con ScreenUtil
+  runApp(ScreenUtilInit(
+    designSize: Size(1920, 1080), // Tamaño base de diseño (ajustar según tu diseño original)
+    builder: (context, child) {  // Aceptar un BuildContext y un Widget hijo (child)
+      return MyApp(firestore: firestore);  // Devolver MyApp con el contexto
+    },
+  ));
 }
 
 class MyApp extends StatelessWidget {
@@ -73,8 +81,8 @@ class _MyHomePageState extends State<MyHomePage> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: MediaQuery.of(context).size.width * 0.4,
-        height: MediaQuery.of(context).size.width * 0.4,
+        width: 0.4.sw,  // Usar .sw para el 40% del ancho de la pantalla
+        height: 0.4.sw, // Usar .sw para el 40% del ancho de la pantalla
         decoration: BoxDecoration(
           color: color,
           borderRadius: BorderRadius.circular(15),
@@ -86,21 +94,21 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ],
         ),
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16.sp), // Usar .sp para el tamaño de padding
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
               imagePath,
-              width: 250,
-              height: 250,
+              width: 250.w,  // Usar .w para escalar el tamaño de la imagen
+              height: 250.w, // Usar .w para escalar el tamaño de la imagen
               semanticLabel: 'Imagen de $label',
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: 10.h),  // Usar .h para la altura
             Text(
               label,
-              style: const TextStyle(
-                fontSize: 24,
+              style: TextStyle(
+                fontSize: 24.sp,  // Usar .sp para el tamaño de texto
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),
@@ -119,14 +127,14 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.primary,
         title: Text(
           widget.title,
-          style: const TextStyle(fontSize: 28),
+          style: TextStyle(fontSize: 28.sp), // Usar .sp para el tamaño de texto
         ),
         centerTitle: true,
       ),
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 32.0),
+          padding: EdgeInsets.symmetric(horizontal: 16.0.w, vertical: 32.0.h), // Escalar el padding
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -139,7 +147,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   color: Colors.blueAccent,
                   onTap: () => _navigateToProfesorLogin(context),
                 ),
-                const SizedBox(width: 20),
+                SizedBox(width: 20.w), // Usar .w para el espacio entre los elementos
                 _buildOption(
                   context: context,
                   label: 'Estudiante',

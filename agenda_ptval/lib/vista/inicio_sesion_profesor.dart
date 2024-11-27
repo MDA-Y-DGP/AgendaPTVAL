@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../controlador/profesor_controller.dart';
 import 'inicio_profesor.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';  // Importar la librería
 
 class InicioSesionProfesor extends StatefulWidget {
   const InicioSesionProfesor({super.key});
@@ -29,7 +30,7 @@ class _InicioSesionState extends State<InicioSesionProfesor> {
 
       try {
         final profesor =
-            await _profesorController.verificarCredenciales(nickname, password);
+        await _profesorController.verificarCredenciales(nickname, password);
         if (profesor != null) {
           Navigator.pushReplacement(
             context,
@@ -53,12 +54,12 @@ class _InicioSesionState extends State<InicioSesionProfesor> {
   Widget _buildLogo() {
     return Column(
       children: [
-        Image.asset('assets/profesor.png', height: 150),
-        const SizedBox(height: 20),
-        const Text(
+        Image.asset('assets/profesor.png', height: 150.h), // Usar .h para el tamaño
+        SizedBox(height: 20.h),
+        Text(
           'Inicio de Sesión - Profesor',
           style: TextStyle(
-            fontSize: 24,
+            fontSize: 24.sp, // Usar .sp para el tamaño de texto dentro del método build
             fontWeight: FontWeight.bold,
             color: Colors.black,
           ),
@@ -74,11 +75,11 @@ class _InicioSesionState extends State<InicioSesionProfesor> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           _buildNicknameField(),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           _buildPasswordField(),
-          const SizedBox(height: 20),
+          SizedBox(height: 20.h),
           _buildLoginButton(),
-          const SizedBox(height: 20),
+          SizedBox(height: 20.h),
           _buildBackButton(),
         ],
       ),
@@ -91,7 +92,7 @@ class _InicioSesionState extends State<InicioSesionProfesor> {
       decoration: InputDecoration(
         labelText: 'Nickname',
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(10.r), // Usar .r para el radio del borde
         ),
         filled: true,
         fillColor: Theme.of(context).colorScheme.surface,
@@ -102,6 +103,7 @@ class _InicioSesionState extends State<InicioSesionProfesor> {
         }
         return null;
       },
+      style: TextStyle(fontSize: 16.sp), // Usar .sp para el tamaño del texto
     );
   }
 
@@ -111,7 +113,7 @@ class _InicioSesionState extends State<InicioSesionProfesor> {
       decoration: InputDecoration(
         labelText: 'Contraseña',
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(10.r), // Usar .r para el radio del borde
         ),
         filled: true,
         fillColor: Theme.of(context).colorScheme.surface,
@@ -123,6 +125,7 @@ class _InicioSesionState extends State<InicioSesionProfesor> {
         }
         return null;
       },
+      style: TextStyle(fontSize: 16.sp), // Usar .sp para el tamaño del texto
     );
   }
 
@@ -134,12 +137,12 @@ class _InicioSesionState extends State<InicioSesionProfesor> {
       style: ElevatedButton.styleFrom(
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white, // Color del texto
-        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+        padding: EdgeInsets.symmetric(horizontal: 50.w, vertical: 15.h), // Usar .w y .h
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(10.r), // Usar .r para el radio
         ),
-        textStyle: const TextStyle(
-          fontSize: 16,
+        textStyle: TextStyle(
+          fontSize: 16.sp, // Usar .sp para el tamaño del texto
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -156,12 +159,12 @@ class _InicioSesionState extends State<InicioSesionProfesor> {
       style: ElevatedButton.styleFrom(
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white, // Color del texto
-        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+        padding: EdgeInsets.symmetric(horizontal: 50.w, vertical: 15.h), // Usar .w y .h
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(10.r), // Usar .r para el radio
         ),
-        textStyle: const TextStyle(
-          fontSize: 16,
+        textStyle: TextStyle(
+          fontSize: 16.sp, // Usar .sp para el tamaño del texto
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -176,19 +179,25 @@ class _InicioSesionState extends State<InicioSesionProfesor> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.primary,
-        title: const Text('Inicio de Sesión'),
+        title: Text(
+          'Inicio de Sesión',
+          style: TextStyle(fontSize: 24.sp), // Usar .sp aquí también
+        ),
         centerTitle: true,
         elevation: 0,
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(horizontal: padding),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildLogo(),
-            const SizedBox(height: 40),
-            _buildForm(),
-          ],
+      body: Center( // Centrar todo el contenido dentro del body
+        child: SingleChildScrollView(
+          padding: EdgeInsets.symmetric(horizontal: padding.w), // Usar .w para el padding
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center, // Centrar el contenido horizontalmente
+            children: [
+              _buildLogo(),
+              SizedBox(height: 40.h), // Usar .h para la altura
+              _buildForm(),
+            ],
+          ),
         ),
       ),
     );

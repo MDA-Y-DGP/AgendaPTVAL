@@ -34,7 +34,7 @@ dependencies:
   # The firebase_core package is essential for initializing Firebase in a Flutter application.
   firebase_core: ^3.6.0
   cloud_firestore: ^5.4.3
-
+  flutter_screenutil: ^5.7.0
   firebase_storage: ^12.3.4
 
 
@@ -76,6 +76,11 @@ flutter:
     - assets/profesor.png
     - assets/perfil_default.png
     - assets/pictograma_contrasena1.png
+    - assets/pictograma_contrasena2.png
+    - assets/pictograma_contrasena3.png
+    - assets/pictograma_contrasena4.png
+    - assets/pictograma_contrasena5.png
+    - assets/pictograma_contrasena6.png
 
 scripts:
   web: flutter run -d chrome --web-renderer html
