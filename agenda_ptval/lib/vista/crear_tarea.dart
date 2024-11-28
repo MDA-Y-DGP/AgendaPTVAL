@@ -32,32 +32,65 @@ class _CrearTareaState extends State<CrearTarea> {
         title: const Text('Crear Tarea'),
         backgroundColor: Theme.of(context).colorScheme.primary,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              _buildTextField(
-                  _tituloController, 'Título', 'Por favor ingresa un título'),
-              const SizedBox(height: 16),
-              _buildTextField(_descripcionController, 'Descripción',
-                  'Por favor ingresa una descripción'),
-              const SizedBox(height: 16),
-              _buildDropdownButtonFormField(),
-              const SizedBox(height: 16),
-              if (_tipo == 'por pasos') ...[
-                _buildPasosList(),
-                _buildAddPasoField(),
-                const SizedBox(height: 10),
-                _buildAddPasoButton(),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                _buildTextField(
+                    _tituloController, 'Título', 'Por favor ingresa un título'),
+                const SizedBox(height: 16),
+                _buildTextField(_descripcionController, 'Descripción',
+                    'Por favor ingresa una descripción'),
+                const SizedBox(height: 16),
+                _buildDropdownButtonFormField(),
+                const SizedBox(height: 16),
+                if (_tipo == 'por pasos') ...[
+                  _buildPasosList(),
+                  _buildAddPasoField(),
+                  const SizedBox(height: 10),
+                  _buildAddPasoButton(),
+                ],
+                const SizedBox(height: 16),
+                _buildCrearTareaButton(),
               ],
-              const SizedBox(height: 16),
-              _buildCrearTareaButton(),
-            ],
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildAddPasoField() {
+    return Column(
+      children: [
+        const SizedBox(height: 16), // Añadir separación
+        TextField(
+          controller: _nuevoPasoController,
+          decoration: const InputDecoration(
+            labelText: 'Texto del paso',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        const SizedBox(height: 10),
+        InputDecorator(
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+          ),
+          child: Container(
+            height: 40, // Ajusta la altura según sea necesario
+            child: ListTile(
+              title: Text(_mediaFile == null && _mediaBytes == null
+                  ? 'Selecciona una imagen/video'
+                  : 'Media seleccionada: $_mediaFileName'),
+              trailing: const Icon(Icons.image),
+              onTap: _pickMedia,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -119,29 +152,6 @@ class _CrearTareaState extends State<CrearTarea> {
           },
         ),
       ),
-    );
-  }
-
-  Widget _buildAddPasoField() {
-    return Column(
-      children: [
-        const SizedBox(height: 16), // Añadir separación
-        TextField(
-          controller: _nuevoPasoController,
-          decoration: const InputDecoration(
-            labelText: 'Texto del Paso',
-            border: OutlineInputBorder(),
-          ),
-        ),
-        const SizedBox(height: 10),
-        ListTile(
-          title: Text(_mediaFile == null && _mediaBytes == null
-              ? 'Selecciona una imagen/video (opcional)'
-              : 'Media seleccionada: $_mediaFileName'),
-          trailing: const Icon(Icons.image),
-          onTap: _pickMedia,
-        ),
-      ],
     );
   }
 
