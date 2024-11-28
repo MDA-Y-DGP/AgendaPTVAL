@@ -15,7 +15,7 @@ Future<void> main() async {
 
   // Inicializar la aplicación con ScreenUtil
   runApp(ScreenUtilInit(
-    designSize: Size(1920, 1080), // Tamaño base de diseño (ajustar según tu diseño original)
+    designSize: Size(1024, 1366), // Tamaño base de diseño para iPad
     builder: (context, child) {  // Aceptar un BuildContext y un Widget hijo (child)
       return MyApp(firestore: firestore);  // Devolver MyApp con el contexto
     },
@@ -85,7 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
         height: 0.4.sw, // Usar .sw para el 40% del ancho de la pantalla
         decoration: BoxDecoration(
           color: color,
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(15.r),
           boxShadow: const [
             BoxShadow(
               color: Colors.black26,
@@ -100,8 +100,8 @@ class _MyHomePageState extends State<MyHomePage> {
           children: [
             Image.asset(
               imagePath,
-              width: 250.w,  // Usar .w para escalar el tamaño de la imagen
-              height: 250.w, // Usar .w para escalar el tamaño de la imagen
+              width: 200.w,  // Ajustar el tamaño de la imagen
+              height: 200.w, // Ajustar el tamaño de la imagen
               semanticLabel: 'Imagen de $label',
             ),
             SizedBox(height: 10.h),  // Usar .h para la altura

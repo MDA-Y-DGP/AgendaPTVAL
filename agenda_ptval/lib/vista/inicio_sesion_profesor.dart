@@ -54,7 +54,7 @@ class _InicioSesionState extends State<InicioSesionProfesor> {
   Widget _buildLogo() {
     return Column(
       children: [
-        Image.asset('assets/profesor.png', height: 150.h), // Usar .h para el tamaño
+        Image.asset('assets/profesor.png', height: 300.h), // Usar .h para el tamaño
         SizedBox(height: 20.h),
         Text(
           'Inicio de Sesión - Profesor',

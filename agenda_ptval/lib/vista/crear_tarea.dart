@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:agenda_ptval/controlador/tarea_controller.dart';
 import 'package:agenda_ptval/controlador/imagen_controller.dart';
+import 'package:agenda_ptval/modelo/tarea_modelo.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -12,6 +14,7 @@ class CrearTarea extends StatefulWidget {
 
 class _CrearTareaState extends State<CrearTarea> {
   final _formKey = GlobalKey<FormState>();
+  final TareaController _tareaController = TareaController();
   final ImagenController _imagenController = ImagenController();
 
   final TextEditingController _tituloController = TextEditingController();
@@ -208,6 +211,16 @@ class _CrearTareaState extends State<CrearTarea> {
               }
             }
           }
+
+          Tarea nuevaTarea = Tarea(
+            idTarea: 0, // El ID se asignará en el controlador
+            titulo: _tituloController.text,
+            descripcion: _descripcionController.text,
+            tipo: _tipo,
+            pasos: _pasos.map((paso) => paso['texto'] as String).toList(),
+          );
+
+          await _tareaController.crearTarea(nuevaTarea);
 
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Tarea creada correctamente')),
