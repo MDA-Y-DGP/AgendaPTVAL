@@ -38,9 +38,11 @@ class _CrearTareaState extends State<CrearTarea> {
           key: _formKey,
           child: Column(
             children: [
-              _buildTextField(_tituloController, 'Título', 'Por favor ingresa un título'),
+              _buildTextField(
+                  _tituloController, 'Título', 'Por favor ingresa un título'),
               const SizedBox(height: 16),
-              _buildTextField(_descripcionController, 'Descripción', 'Por favor ingresa una descripción'),
+              _buildTextField(_descripcionController, 'Descripción',
+                  'Por favor ingresa una descripción'),
               const SizedBox(height: 16),
               _buildDropdownButtonFormField(),
               const SizedBox(height: 16),
@@ -59,7 +61,8 @@ class _CrearTareaState extends State<CrearTarea> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String labelText, String validationMessage) {
+  Widget _buildTextField(TextEditingController controller, String labelText,
+      String validationMessage) {
     return TextFormField(
       controller: controller,
       decoration: InputDecoration(
@@ -78,7 +81,7 @@ class _CrearTareaState extends State<CrearTarea> {
   Widget _buildDropdownButtonFormField() {
     return DropdownButtonFormField<String>(
       value: _tipo,
-      decoration:const InputDecoration(
+      decoration: const InputDecoration(
         labelText: 'Tipo de Tarea',
         border: OutlineInputBorder(),
       ),
@@ -97,17 +100,24 @@ class _CrearTareaState extends State<CrearTarea> {
   }
 
   Widget _buildPasosList() {
-    return Expanded(
-      child: ListView.builder(
-        itemCount: _pasos.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(_pasos[index]['texto']),
-            subtitle: _pasos[index]['urlMedia'] != null
-                ? Text('Media: ${_pasos[index]['urlMedia']}')
-                : null,
-          );
-        },
+    return InputDecorator(
+      decoration: const InputDecoration(
+        labelText: 'Lista de pasos',
+        border: OutlineInputBorder(),
+      ),
+      child: Container(
+        height: 150, // Ajusta la altura según sea necesario
+        child: ListView.builder(
+          itemCount: _pasos.length,
+          itemBuilder: (context, index) {
+            return ListTile(
+              title: Text(_pasos[index]['texto']),
+              subtitle: _pasos[index]['urlMedia'] != null
+                  ? Text('Media: ${_pasos[index]['urlMedia']}')
+                  : null,
+            );
+          },
+        ),
       ),
     );
   }
@@ -115,9 +125,10 @@ class _CrearTareaState extends State<CrearTarea> {
   Widget _buildAddPasoField() {
     return Column(
       children: [
+        const SizedBox(height: 16), // Añadir separación
         TextField(
           controller: _nuevoPasoController,
-          decoration:const InputDecoration(
+          decoration: const InputDecoration(
             labelText: 'Texto del Paso',
             border: OutlineInputBorder(),
           ),
@@ -234,7 +245,8 @@ class _CrearTareaState extends State<CrearTarea> {
     }
   }
 
-  Future<String?> _subirImagenPaso(File? mediaFile, Uint8List? mediaBytes, int pasoIndex) async {
+  Future<String?> _subirImagenPaso(
+      File? mediaFile, Uint8List? mediaBytes, int pasoIndex) async {
     if (mediaFile != null || mediaBytes != null) {
       try {
         String nombreArchivo = _mediaFileName ?? '';
@@ -246,9 +258,11 @@ class _CrearTareaState extends State<CrearTarea> {
         String ruta = 'tareas/${_tituloController.text}';
 
         if (kIsWeb && mediaBytes != null) {
-          return await _imagenController.subirImagenWebPaso(mediaBytes, ruta, nombreFinal);
+          return await _imagenController.subirImagenWebPaso(
+              mediaBytes, ruta, nombreFinal);
         } else if (mediaFile != null) {
-          return await _imagenController.subirImagenPaso(mediaFile, ruta, nombreFinal);
+          return await _imagenController.subirImagenPaso(
+              mediaFile, ruta, nombreFinal);
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
