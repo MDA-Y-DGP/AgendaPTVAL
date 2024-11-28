@@ -30,7 +30,6 @@ class _RealizarComandaState extends State<RealizarComanda> {
           ? Center(child: CircularProgressIndicator())
           : Column(
               children: [
-                _buildNavigationButtons(),
                 Expanded(
                   child: PageView.builder(
                     controller: _controller.pageController,
@@ -58,12 +57,16 @@ class _RealizarComandaState extends State<RealizarComanda> {
                             if (_controller.paginaActual ==
                                 _controller.clases.length - 1)
                               _buildConfirmButton(),
+                            SizedBox(
+                                height:
+                                    20), // Añadir separación antes de las flechas
                           ],
                         ),
                       );
                     },
                   ),
                 ),
+                _buildNavigationButtons(), // Mover los botones de navegación aquí
               ],
             ),
     );
@@ -73,93 +76,172 @@ class _RealizarComandaState extends State<RealizarComanda> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        IconButton(
-          icon: Icon(Icons.arrow_back, size: 60),
-          onPressed: _controller.paginaActual > 0
-              ? () {
-                  setState(() {
-                    _controller.cambiarPagina(_controller.paginaActual - 1);
-                  });
-                }
-              : null,
+        Row(
+          children: [
+            IconButton(
+              icon: Icon(Icons.arrow_back,
+                  size: 60), // Aumentar tamaño de la flecha
+              onPressed: _controller.paginaActual > 0
+                  ? () {
+                      setState(() {
+                        _controller.paginaActual--;
+                        _controller.pageController.previousPage(
+                          duration: Duration(milliseconds: 300),
+                          curve: Curves.ease,
+                        );
+                      });
+                    }
+                  : null,
+            ),
+            Text('clase anterior'),
+          ],
         ),
-        IconButton(
-          icon: Icon(Icons.arrow_forward, size: 60),
-          onPressed: _controller.paginaActual < _controller.clases.length - 1
-              ? () {
-                  setState(() {
-                    _controller.cambiarPagina(_controller.paginaActual + 1);
-                  });
-                }
-              : null,
+        Row(
+          children: [
+            Text('siguiente clase'),
+            IconButton(
+              icon: Icon(Icons.arrow_forward,
+                  size: 60), // Aumentar tamaño de la flecha
+              onPressed:
+                  _controller.paginaActual < _controller.clases.length - 1
+                      ? () {
+                          setState(() {
+                            _controller.paginaActual++;
+                            _controller.pageController.nextPage(
+                              duration: Duration(milliseconds: 300),
+                              curve: Curves.ease,
+                            );
+                          });
+                        }
+                      : null,
+            ),
+          ],
         ),
       ],
     );
   }
 
   Widget _buildClassTitle(String clase) {
-    return Text(
-      clase,
-      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+    return InputDecorator(
+      decoration: InputDecoration(
+        labelText: 'Clase',
+        border: OutlineInputBorder(),
+      ),
+      child: Text(clase),
     );
   }
 
   Widget _buildMenuItems(String clase) {
     return Column(
-      children: _controller.tiposMenu.map((tipoMenu) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 5.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(tipoMenu),
-              Row(
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.remove, size: 30),
-                    onPressed: () {
-                      setState(() {
-                        _controller.decrementarCantidad(clase, tipoMenu);
-                      });
-                    },
-                  ),
-                  Text(
-                    _controller.comandas[clase]![tipoMenu].toString(),
-                    style: TextStyle(fontSize: 20),
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.add, size: 30),
-                    onPressed: () {
-                      setState(() {
-                        _controller.incrementarCantidad(clase, tipoMenu);
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ],
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        InputDecorator(
+          decoration: InputDecoration(
+            labelText: 'Lista de menús',
+            border: OutlineInputBorder(),
+            contentPadding: EdgeInsets.all(8.0),
           ),
-        );
-      }).toList(),
+          child: Column(
+            children: _controller.tiposMenu.map((tipoMenu) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 5.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      tipoMenu,
+                      style: TextStyle(fontWeight: FontWeight.normal),
+                    ),
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.remove, size: 30),
+                          onPressed: () {
+                            setState(() {
+                              _controller.decrementarCantidad(clase, tipoMenu);
+                            });
+                          },
+                        ),
+                        Text(
+                          _controller.comandas[clase]![tipoMenu].toString(),
+                          style: TextStyle(fontSize: 20),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.add, size: 30),
+                          onPressed: () {
+                            setState(() {
+                              _controller.incrementarCantidad(clase, tipoMenu);
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildNotes(String clase) {
+    if (_controller.notas[clase] == null || _controller.notas[clase]!.isEmpty) {
+      return SizedBox.shrink();
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: _controller.notas[clase]!.map((nota) {
-        int index = _controller.notas[clase]!.indexOf(nota) + 1;
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ListTile(
-              title: Text('Nota $index:'),
-              subtitle: Text(nota),
+      children: [
+        InputDecorator(
+          decoration: InputDecoration(
+            labelText: 'Lista de notas',
+            border: OutlineInputBorder(),
+          ),
+          child: Container(
+            height: 140, // Altura fija
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: _controller.notas[clase]!.map((nota) {
+                  int index = _controller.notas[clase]!.indexOf(nota) + 1;
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4.0),
+                        child: RichText(
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: 'Nota $index: ',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              TextSpan(
+                                text: nota,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.normal,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Divider(),
+                    ],
+                  );
+                }).toList(),
+              ),
             ),
-            Divider(),
-          ],
-        );
-      }).toList(),
+          ),
+        ),
+        SizedBox(height: 10), // Añadir separación
+      ],
     );
   }
 
