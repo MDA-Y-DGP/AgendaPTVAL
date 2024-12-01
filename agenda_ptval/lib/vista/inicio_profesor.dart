@@ -1,9 +1,9 @@
+import 'package:agenda_ptval/vista/estudiante.dart';
+import 'package:agenda_ptval/vista/profesor.dart';
 import 'package:flutter/material.dart';
 import '../modelo/profesor_modelo.dart';
 import '../controlador/profesor_controller.dart';
 import 'clases.dart';
-import 'registro_estudiante.dart';
-import 'registro_profesor.dart';
 import 'crear_menus.dart';
 import 'pedir_materiales.dart';
 import 'listas_inventario.dart';
@@ -202,23 +202,23 @@ class _PantallaInicioState extends State<PantallaInicio> {
             case 1:
               return _buildOption(
                 context: context,
-                label: 'Registrar Estudiante',
+                label: 'Estudiantes',
                 icon: Icons.person_add_alt,
                 color: Theme.of(context).colorScheme.primary,
                 onTap: () => Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => RegistroEstudiante()),
+                  MaterialPageRoute(builder: (context) => ListaEstudiantes()),
                 ),
               );
             case 2:
               return _buildOption(
                 context: context,
-                label: 'Registrar Profesor',
+                label: 'Profesores',
                 icon: Icons.person_add,
                 color: Theme.of(context).colorScheme.primary,
                 onTap: () => Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => RegistroProfesor()),
+                  MaterialPageRoute(builder: (context) => ListaProfesores()),
                 ),
               );
             case 3:
