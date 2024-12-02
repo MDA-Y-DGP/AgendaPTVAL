@@ -176,4 +176,44 @@ class EstudianteController {
       throw Exception('Error al eliminar estudiante: $e');
     }
   }
+
+  Future<List<Map<String, dynamic>>> obtenerTareasAsignadasPorFecha(String fecha) async {
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('tareasAsignadas')
+          .where('fecha', isEqualTo: fecha)
+          .get();
+
+      if (querySnapshot.docs.isEmpty) {
+        return [];
+      }
+
+      List<Map<String, dynamic>> tareas = [];
+      for (var doc in querySnapshot.docs) {
+        var data = doc.data() as Map<String, dynamic>;
+        tareas.add(data['tarea']);
+      }
+
+      return tareas;
+    } catch (e) {
+      throw Exception('Error al obtener tareas asignadas para la fecha $fecha: $e');
+    }
+  }
+
+  Future<void> modificarPerfilEstudiante(String id, Map<String, dynamic> nuevosDatos) async {
+    try {
+      QuerySnapshot querySnapshot = await _estudiantesCollection
+          .where('id_estudiante', isEqualTo: int.parse(id))
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        DocumentSnapshot doc = querySnapshot.docs.first;
+        await doc.reference.update(nuevosDatos);
+      } else {
+        throw Exception('No se encontró el estudiante con este ID');
+      }
+    } catch (e) {
+      throw Exception('Error al modificar el perfil del estudiante: $e');
+    }
+  }
 }
