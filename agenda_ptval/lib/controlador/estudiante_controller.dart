@@ -96,8 +96,12 @@ class EstudianteController {
   Future<List<Estudiante>> obtenerEstudiantesPorClase(String claseId) async {
     try {
       int claseIdInt = int.parse(claseId);
-      QuerySnapshot snapshot = await _estudiantesCollection.where('id_clase', isEqualTo: claseIdInt).get();
-      return snapshot.docs.map((doc) => Estudiante.fromJson(doc.data() as Map<String, dynamic>)).toList();
+      QuerySnapshot snapshot = await _estudiantesCollection
+          .where('id_clase', isEqualTo: claseIdInt)
+          .get();
+      return snapshot.docs
+          .map((doc) => Estudiante.fromJson(doc.data() as Map<String, dynamic>))
+          .toList();
     } catch (e) {
       throw Exception('Error al obtener estudiantes por clase: $e');
     }
@@ -157,7 +161,9 @@ class EstudianteController {
   Future<List<Estudiante>> obtenerTodosEstudiantes() async {
     try {
       QuerySnapshot snapshot = await _estudiantesCollection.get();
-      return snapshot.docs.map((doc) => Estudiante.fromJson(doc.data() as Map<String, dynamic>)).toList();
+      return snapshot.docs
+          .map((doc) => Estudiante.fromJson(doc.data() as Map<String, dynamic>))
+          .toList();
     } catch (e) {
       throw Exception('Error al obtener todos los estudiantes: $e');
     }
@@ -177,11 +183,14 @@ class EstudianteController {
     }
   }
 
-  Future<List<Map<String, dynamic>>> obtenerTareasAsignadasPorFecha(String fecha) async {
+  Future<List<Map<String, dynamic>>> obtenerTareasAsignadasPorFecha(
+      String fecha, String nickname) async {
+    print('Fecha: $fecha, Nickname: $nickname');
     try {
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
           .collection('tareasAsignadas')
           .where('fecha', isEqualTo: fecha)
+          .where('nickname', isEqualTo: nickname)
           .get();
 
       if (querySnapshot.docs.isEmpty) {
@@ -193,14 +202,15 @@ class EstudianteController {
         var data = doc.data() as Map<String, dynamic>;
         tareas.add(data['tarea']);
       }
-
       return tareas;
     } catch (e) {
-      throw Exception('Error al obtener tareas asignadas para la fecha $fecha: $e');
+      throw Exception(
+          'Error al obtener tareas asignadas para la fecha $fecha y nickname $nickname: $e');
     }
   }
 
-  Future<void> modificarPerfilEstudiante(String id, Map<String, dynamic> nuevosDatos) async {
+  Future<void> modificarPerfilEstudiante(
+      String id, Map<String, dynamic> nuevosDatos) async {
     try {
       QuerySnapshot querySnapshot = await _estudiantesCollection
           .where('id_estudiante', isEqualTo: int.parse(id))
