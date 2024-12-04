@@ -4,7 +4,7 @@ import 'package:agenda_ptval/modelo/tarea_modelo.dart';
 class TareaController {
   final CollectionReference _tareasCollection =
       FirebaseFirestore.instance.collection('tareas');
-  
+
   final CollectionReference _estudiantesCollection =
       FirebaseFirestore.instance.collection('estudiantes');
 
@@ -46,39 +46,41 @@ class TareaController {
   }
 
   Future<List<Tarea>> obtenerTareasDeTipoComedor() async {
-    QuerySnapshot querySnapshot = await _tareasCollection
-        .where('tipo', isEqualTo: 'comedor')
-        .get();
+    QuerySnapshot querySnapshot =
+        await _tareasCollection.where('tipo', isEqualTo: 'comedor').get();
     return querySnapshot.docs.map((doc) {
       return Tarea.fromMap(doc.data() as Map<String, dynamic>);
     }).toList();
   }
 
   Future<List<Tarea>> obtenerTareasDeTipoPorPasos() async {
-    QuerySnapshot querySnapshot = await _tareasCollection
-        .where('tipo', isEqualTo: 'por pasos')
-        .get();
+    QuerySnapshot querySnapshot =
+        await _tareasCollection.where('tipo', isEqualTo: 'por pasos').get();
     return querySnapshot.docs.map((doc) {
       return Tarea.fromMap(doc.data() as Map<String, dynamic>);
     }).toList();
   }
 
   Future<List<Tarea>> obtenerTareasDeTipoInventario() async {
-    QuerySnapshot querySnapshot = await _tareasCollection
-        .where('tipo', isEqualTo: 'inventario')
-        .get();
+    QuerySnapshot querySnapshot =
+        await _tareasCollection.where('tipo', isEqualTo: 'inventario').get();
     return querySnapshot.docs.map((doc) {
       return Tarea.fromMap(doc.data() as Map<String, dynamic>);
     }).toList();
   }
 
-  Future<void> asignarTarea(String selectedTarea, String selectedEstudiante) async {
-    // Buscar al estudiante por nickname en la colección estudiantes
-    QuerySnapshot estudianteSnapshot = await _estudiantesCollection
-        .where('nickname', isEqualTo: selectedEstudiante)
-        .get();
+  Future<void> asignarTarea(
+      String selectedTarea, String nicknameEstudiante) async {
+    try {
+      // Buscar al estudiante
+      QuerySnapshot estudianteSnapshot = await _estudiantesCollection
+          .where('nickname', isEqualTo: nicknameEstudiante)
+          .get();
 
-    if (estudianteSnapshot.docs.isNotEmpty) {
+      if (estudianteSnapshot.docs.isEmpty) {
+        throw Exception('Estudiante no encontrado');
+      }
+
       DocumentSnapshot estudianteDoc = estudianteSnapshot.docs.first;
       String estudianteId = estudianteDoc.id;
 
@@ -103,13 +105,19 @@ class TareaController {
           .doc(estudianteId)
           .collection('tareasAsignadas');
 
-      // Añadir la tarea asignada
+      // Añadir la tarea asignada con el campo completado
       await tareasAsignadasRef.add({
         'fecha': fecha,
-        'tarea': tarea.toMap(),
+        'idTarea': tarea.idTarea,
+        'titulo': tarea.titulo,
+        'descripcion': tarea.descripcion,
+        'tipo': tarea.tipo,
+        'pasos': tarea.pasos,
+        'evaluacion': tarea.evaluacion,
+        'completado': false, // Añadir el campo completado con valor false
       });
-    } else {
-      throw Exception('Estudiante no encontrado');
+    } catch (e) {
+      print('Error al asignar tarea: $e');
     }
   }
 
@@ -127,9 +135,8 @@ class TareaController {
     String estudianteId = estudianteDoc.id;
 
     // Referencia a la subcolección tareasAsignadas
-    CollectionReference tareasAsignadasRef = _estudiantesCollection
-        .doc(estudianteId)
-        .collection('tareasAsignadas');
+    CollectionReference tareasAsignadasRef =
+        _estudiantesCollection.doc(estudianteId).collection('tareasAsignadas');
 
     // Buscar la tarea en la subcolección tareasAsignadas
     QuerySnapshot tareasAsignadasSnapshot = await tareasAsignadasRef
@@ -160,8 +167,8 @@ class TareaController {
     await tareaDoc.reference.delete();
   }
 
-
-  Future<void> evaluarTarea(int idTarea, String evaluacion, String nicknameEstudiante) async {
+  Future<void> evaluarTarea(
+      int idTarea, String evaluacion, String nicknameEstudiante) async {
     // Buscar al estudiante por su nickname en la colección estudiantes
     QuerySnapshot estudianteSnapshot = await _estudiantesCollection
         .where('nickname', isEqualTo: nicknameEstudiante)
@@ -210,13 +217,10 @@ class TareaController {
     }
 
     if (!tareaEncontrada) {
-      throw Exception('Tarea con idTarea $idTarea no encontrada en las asignaciones de este estudiante');
+      throw Exception(
+          'Tarea con idTarea $idTarea no encontrada en las asignaciones de este estudiante');
     }
   }
-
-
-
-
 
   Future<List<Tarea>> obtenerTareasAsignadas(String nicknameEstudiante) async {
     // Buscar al estudiante
@@ -232,9 +236,8 @@ class TareaController {
     String estudianteId = estudianteDoc.id;
 
     // Obtener tareas asignadas
-    CollectionReference tareasAsignadasRef = _estudiantesCollection
-        .doc(estudianteId)
-        .collection('tareasAsignadas');
+    CollectionReference tareasAsignadasRef =
+        _estudiantesCollection.doc(estudianteId).collection('tareasAsignadas');
 
     QuerySnapshot tareasAsignadasSnapshot = await tareasAsignadasRef.get();
 
@@ -246,7 +249,8 @@ class TareaController {
     return tareasAsignadas;
   }
 
-  Future<List<Tarea>> obtenerTareasCompletadas(String nicknameEstudiante) async {
+  Future<List<Tarea>> obtenerTareasCompletadas(
+      String nicknameEstudiante) async {
     // Buscar al estudiante
     QuerySnapshot estudianteSnapshot = await _estudiantesCollection
         .where('nickname', isEqualTo: nicknameEstudiante)
@@ -277,9 +281,8 @@ class TareaController {
   Future<void> borrarTarea(int idTarea) async {
     try {
       // Borrar la tarea de la colección principal
-      QuerySnapshot tareaSnapshot = await _tareasCollection
-          .where('idTarea', isEqualTo: idTarea)
-          .get();
+      QuerySnapshot tareaSnapshot =
+          await _tareasCollection.where('idTarea', isEqualTo: idTarea).get();
 
       if (tareaSnapshot.docs.isNotEmpty) {
         await tareaSnapshot.docs.first.reference.delete();
