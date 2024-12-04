@@ -70,7 +70,7 @@ class TareaController {
   }
 
   Future<void> asignarTarea(
-      String selectedTarea, String nicknameEstudiante) async {
+      String selectedTarea, String nicknameEstudiante, String fecha) async {
     try {
       // Buscar al estudiante
       QuerySnapshot estudianteSnapshot = await _estudiantesCollection
@@ -83,10 +83,6 @@ class TareaController {
 
       DocumentSnapshot estudianteDoc = estudianteSnapshot.docs.first;
       String estudianteId = estudianteDoc.id;
-
-      // Obtener la fecha de hoy sin la hora
-      DateTime now = DateTime.now();
-      String fecha = '${now.year}-${now.month}-${now.day}';
 
       // Buscar la tarea en la colección principal de tareas por idTarea
       QuerySnapshot tareaQuerySnapshot = await _tareasCollection

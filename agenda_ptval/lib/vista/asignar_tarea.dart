@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../controlador/clase_controller.dart';
 import '../controlador/tarea_controller.dart';
 import '../controlador/estudiante_controller.dart';
@@ -21,6 +22,7 @@ class _AsignarTareaState extends State<AsignarTarea> {
   String? _selectedClase;
   String? _selectedEstudiante;
   List<Estudiante> _estudiantes = [];
+  DateTime? _selectedDate;
 
   @override
   void initState() {
@@ -110,8 +112,10 @@ class _AsignarTareaState extends State<AsignarTarea> {
         const SizedBox(height: 20),
         _buildEstudiantesDropdown(),
         const SizedBox(height: 20),
+        _buildFechaPicker(),
+        const SizedBox(height: 20),
         ElevatedButton(
-          onPressed: _selectedClase == null || _selectedTarea == null || _selectedEstudiante == null
+          onPressed: _selectedClase == null || _selectedTarea == null || _selectedEstudiante == null || _selectedDate == null
               ? null
               : asignarTarea,
           style: ElevatedButton.styleFrom(
@@ -226,9 +230,62 @@ class _AsignarTareaState extends State<AsignarTarea> {
     );
   }
 
+  Widget _buildFechaPicker() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Selecciona una fecha',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                _selectedDate == null
+                    ? 'No se ha seleccionado ninguna fecha'
+                    : DateFormat('yyyy-MM-dd').format(_selectedDate!),
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
+            ),
+            IconButton(
+              icon: Icon(Icons.calendar_today, color: Theme.of(context).colorScheme.primary),
+              onPressed: () async {
+                DateTime? pickedDate = await showDatePicker(
+                  context: context,
+                  initialDate: DateTime.now(),
+                  firstDate: DateTime.now(),
+                  lastDate: DateTime(2100),
+                  selectableDayPredicate: (DateTime date) {
+                    // Deshabilitar sábados y domingos
+                    if (date.weekday == 6 || date.weekday == 7) {
+                      return false;
+                    }
+                    return true;
+                  },
+                );
+                if (pickedDate != null) {
+                  setState(() {
+                    _selectedDate = pickedDate;
+                  });
+                }
+              },
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
   void _fetchEstudiantesPorClase(String claseId) async {
-    setState(() {
-    });
     List<Estudiante> estudiantes = await _estudianteController.obtenerEstudiantesPorClase(claseId);
     setState(() {
       _estudiantes = estudiantes;
@@ -240,9 +297,10 @@ class _AsignarTareaState extends State<AsignarTarea> {
   void _asignarTareaInventario() async => _asignarTareaGenerica('inventario');
 
   void _asignarTareaGenerica(String tipo) async {
-    if (_selectedClase != null && _selectedTarea != null && _selectedEstudiante != null) {
+    if (_selectedClase != null && _selectedTarea != null && _selectedEstudiante != null && _selectedDate != null) {
       try {
-        await _tareaController.asignarTarea(_selectedTarea!, _selectedEstudiante!);
+        String fecha = DateFormat('yyyy-MM-dd').format(_selectedDate!);
+        await _tareaController.asignarTarea(_selectedTarea!, _selectedEstudiante!, fecha);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Tarea de $tipo asignada correctamente')),
         );
