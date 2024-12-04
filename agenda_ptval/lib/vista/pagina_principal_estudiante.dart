@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../modelo/tarea_modelo.dart'; // Importa el modelo de Tarea
 import '../controlador/tarea_controller.dart'; // Importa la función obtenerTareasAsignadasPorFecha
+import 'inicio_sesion_estudiante.dart';
 
 class PaginaPrincipalEstudiante extends StatefulWidget {
   final String nickname;
@@ -19,6 +20,9 @@ class _PaginaPrincipalEstudianteState extends State<PaginaPrincipalEstudiante> {
   int _currentPage = 0;
   List<Tarea> _tareasDelDia = []; // Lista de tareas del día actual
 
+  // Mapa para almacenar el estado de completado de cada tarea
+  Map<int, bool> _tareasCompletadas = {};
+
   @override
   void initState() {
     super.initState();
@@ -35,8 +39,12 @@ class _PaginaPrincipalEstudianteState extends State<PaginaPrincipalEstudiante> {
       await _tareaController.obtenerTareasAsignadasPorFecha(fecha, widget.nickname);
       setState(() {
         _tareasDelDia = tareasData;
+
+        // Inicializamos el estado de las tareas según el valor de 'completado' desde Firestore
+        _tareasCompletadas = {
+          for (var t in tareasData) t.idTarea: t.completado ?? false,
+        };
       });
-      print(_tareasDelDia);
     } catch (e) {
       // Manejar error
       print('Error al obtener tareas para la fecha $fecha: $e');
@@ -118,10 +126,46 @@ class _PaginaPrincipalEstudianteState extends State<PaginaPrincipalEstudiante> {
       itemCount: _tareasDelDia.length,
       itemBuilder: (context, index) {
         Tarea tarea = _tareasDelDia[index];
+        bool isCompletada = _tareasCompletadas[tarea.idTarea] ?? false;
         return ListTile(
           leading: Icon(_getIconForTask(tarea.tipo)),
-          title: Text(tarea.titulo),
-          subtitle: Text(tarea.descripcion),
+          title: Text(
+            tarea.titulo,
+            style: TextStyle(
+              color: isCompletada ? Colors.grey : Colors.black,
+              decoration: isCompletada ? TextDecoration.lineThrough : null,
+            ),
+          ),
+          subtitle: Text(
+            tarea.descripcion,
+            style: TextStyle(
+              color: isCompletada ? Colors.grey : Colors.black,
+              decoration: isCompletada ? TextDecoration.lineThrough : null,
+            ),
+          ),
+          trailing: Checkbox(
+            value: isCompletada,
+            activeColor: Colors.blue, // Color del check cuando está marcado
+            onChanged: (bool? value) {
+              if (value != null) {
+                setState(() {
+                  _tareasCompletadas[tarea.idTarea] = value; // Actualizamos el estado del checkbox
+                });
+                // Llamamos a completarTarea con el idFirebase de la tarea específica
+                _tareaController.completarTarea(tarea.idFirebase!, widget.nickname); // Pasamos el idFirebase directamente de la tarea
+              }
+            },
+          ),
+          onTap: isCompletada
+              ? null // Deshabilitar el tap si la tarea está completada
+              : () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => InicioSesionEstudiante(),
+              ),
+            );
+          },
         );
       },
     );

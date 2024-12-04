@@ -7,6 +7,7 @@ class Tarea {
   String? evaluacion;
   String? fecha;
   String? idFirebase;
+  bool? completado;
 
   Tarea({
     required this.idTarea,
@@ -17,6 +18,7 @@ class Tarea {
     this.evaluacion,
     this.fecha,
     this.idFirebase,
+    this.completado,
   });
 
   Map<String, dynamic> toMap() {
@@ -29,6 +31,7 @@ class Tarea {
       'evaluacion': evaluacion,
       'fecha': fecha,
       'idFirebase': idFirebase,
+      'completado': completado,
     };
   }
 
@@ -42,6 +45,7 @@ class Tarea {
       evaluacion: map['evaluacion'],
       fecha: map['fecha'],
       idFirebase: map['idFirebase'],
+      completado: map['completado'] ?? false,
     );
   }
 }

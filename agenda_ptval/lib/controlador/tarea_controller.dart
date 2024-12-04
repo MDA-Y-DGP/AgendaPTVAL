@@ -144,9 +144,15 @@ class TareaController {
       throw Exception('Tarea con idTarea $idTarea no encontrada en las asignaciones de este estudiante');
     }
 
-    // Actualizar la evaluación de la tarea
+    // Obtener el estado actual de la tarea
+    bool completadaActual = tareaDoc['completado'] ?? false; // Si no está definida, asumimos que está incompleta
+
+    // Alternar el estado de completada (de true a false o de false a true)
+    bool nuevoEstado = !completadaActual;
+
+    // Actualizar el estado de la tarea en Firestore
     await tareaDoc.reference.update({
-      'completado': true, // Actualizamos la evaluación directamente
+      'completado': nuevoEstado, // Alternamos el estado de la tarea
     });
   }
 
