@@ -110,46 +110,68 @@ class _CrearListasInventarioState extends State<CrearListasInventario> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: ListView.builder(
-          itemCount: _materiales.length,
-          itemBuilder: (context, index) {
-            return Card(
-              child: ListTile(
-                title: Text(_materiales[index].nombre),
-                subtitle: Text('Cantidad: ${_materiales[index].cantidad}'),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.edit),
-                      onPressed: () {
-                        _mostrarPopupEditarMaterial(_materiales[index], index);
-                      },
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                itemCount: _materiales.length,
+                itemBuilder: (context, index) {
+                  return Card(
+                    color: Theme.of(context).colorScheme.surface, // Fondo de la tarjeta
+                    child: ListTile(
+                      title: Text(
+                        _materiales[index].nombre,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface, // Color del texto
+                        ),
+                      ),
+                      subtitle: Text('Cantidad: ${_materiales[index].cantidad}'),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () {
+                              _mostrarPopupEditarMaterial(_materiales[index], index);
+                            },
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () =>
+                                _eliminarMaterial(_materiales[index].idObjeto, index),
+                          ),
+                        ],
+                      ),
                     ),
-                    IconButton(
-                      icon: Icon(Icons.delete),
-                      onPressed: () =>
-                          _eliminarMaterial(_materiales[index].idObjeto, index),
-                    ),
-                  ],
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AgregarMaterial()),
+                ).then((_) => _cargarInventario());
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                textStyle: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white, // Color del texto
                 ),
               ),
-            );
-          },
+              child: const Text('Agregar Material', style: TextStyle(color: Colors.white)),
+            ),
+          ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => AgregarMaterial()),
-          ).then((_) => _cargarInventario());
-        },
-        label: Text('Agregar Material'),
-        icon: Icon(Icons.add),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }
