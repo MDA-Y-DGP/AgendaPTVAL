@@ -202,6 +202,7 @@ class EstudianteController {
         var data = doc.data() as Map<String, dynamic>;
         tareas.add(data['tarea']);
       }
+      print(tareas);
       return tareas;
     } catch (e) {
       throw Exception(

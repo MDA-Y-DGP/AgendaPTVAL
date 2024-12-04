@@ -18,7 +18,7 @@ class _EvaluarTareaState extends State<EvaluarTarea> {
 
   String? _selectedClase;
   String? _selectedEstudiante;
-  int? _selectedTarea;
+  String? _selectedTarea;  // Cambiado a String para idFirebase
   List<Estudiante> _estudiantes = [];
   List<Tarea> _tareas = [];
 
@@ -115,21 +115,21 @@ class _EvaluarTareaState extends State<EvaluarTarea> {
 
   Widget _buildTareasDropdown() {
     return _tareas.isEmpty
-        ?const Center(child: Text('No hay tareas asignadas'))
-        : DropdownButtonFormField<int>(
-      decoration:const InputDecoration(
+        ? const Center(child: Text('No hay tareas completadas'))
+        : DropdownButtonFormField<String>(  // Cambiado a String
+      decoration: const InputDecoration(
         labelText: 'Selecciona una tarea',
         border: OutlineInputBorder(),
       ),
       value: _selectedTarea,
-      onChanged: (int? newValue) {
+      onChanged: (String? newValue) {  // Cambiado a String
         setState(() {
           _selectedTarea = newValue;
         });
       },
       items: _tareas.map((Tarea tarea) {
-        return DropdownMenuItem<int>(
-          value: tarea.idTarea,
+        return DropdownMenuItem<String>(
+          value: tarea.idFirebase,  // Usamos idFirebase aquí
           child: Text(tarea.titulo),
         );
       }).toList(),
@@ -143,7 +143,7 @@ class _EvaluarTareaState extends State<EvaluarTarea> {
         TextField(
           controller: _evaluacionController,
           maxLines: 4,
-          decoration:const InputDecoration(
+          decoration: const InputDecoration(
             labelText: 'Escribe la evaluación',
             border: OutlineInputBorder(),
           ),
@@ -187,7 +187,7 @@ class _EvaluarTareaState extends State<EvaluarTarea> {
   void _fetchTareasPorEstudianteCompletadas(String estudianteId) async {
     setState(() {
     });
-    List<Tarea> tareas = await _tareaController.obtenerTareasCompletadas(estudianteId);
+    List<Tarea> tareas = await _tareaController.obtenerTareasCompletadasSinEvaluar(estudianteId);
     setState(() {
       _tareas = tareas;
     });
@@ -196,10 +196,11 @@ class _EvaluarTareaState extends State<EvaluarTarea> {
   void _evaluarTareaSeleccionada() async {
     if (_selectedTarea != null && _evaluacionController.text.isNotEmpty) {
       try {
+        // Ahora pasamos el idFirebase en lugar de idTarea
         await _tareaController.evaluarTarea(
-          _selectedTarea!,
-          _evaluacionController.text,
-          _selectedEstudiante!
+            _selectedTarea!,  // Este es el idFirebase
+            _evaluacionController.text,
+            _selectedEstudiante!
         );
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Tarea evaluada correctamente')),

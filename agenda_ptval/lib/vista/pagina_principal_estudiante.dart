@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../modelo/tarea_modelo.dart'; // Importa el modelo de Tarea
+import '../controlador/tarea_controller.dart'; // Importa la función obtenerTareasAsignadasPorFecha
 
 class PaginaPrincipalEstudiante extends StatefulWidget {
   final String nickname;
@@ -14,72 +15,38 @@ class PaginaPrincipalEstudiante extends StatefulWidget {
 
 class _PaginaPrincipalEstudianteState extends State<PaginaPrincipalEstudiante> {
   late PageController _pageController;
+  late TareaController _tareaController;
   int _currentPage = 0;
-  Map<String, List<Tarea>> _tareasPorDia = {};
+  List<Tarea> _tareasDelDia = []; // Lista de tareas del día actual
 
   @override
   void initState() {
     super.initState();
     _currentPage = _getCurrentDayIndex();
     _pageController = PageController(initialPage: _currentPage);
-    _loadTareasAsignadas();
+    _tareaController = TareaController();
+    _loadTareasPorDia(); // Cargar las tareas del día actual al iniciar
   }
 
-  Future<void> _loadTareasAsignadas() async {
+  Future<void> _loadTareasPorDia() async {
+    String fecha = _getFechaPorDia(_currentPage);
     try {
-      Map<String, List<Tarea>> tareasPorDia =
-          await obtenerTareasAsignadas(widget.nickname);
+      List<Tarea> tareasData =
+      await _tareaController.obtenerTareasAsignadasPorFecha(fecha, widget.nickname);
       setState(() {
-        _tareasPorDia = tareasPorDia;
+        _tareasDelDia = tareasData;
       });
+      print(_tareasDelDia);
     } catch (e) {
       // Manejar error
-      print('Error al obtener tareas asignadas: $e');
+      print('Error al obtener tareas para la fecha $fecha: $e');
+      setState(() {
+        _tareasDelDia = [];
+      });
     }
-  }
-
-  Future<Map<String, List<Tarea>>> obtenerTareasAsignadas(
-      String nicknameEstudiante) async {
-    // Buscar al estudiante
-    QuerySnapshot estudianteSnapshot = await FirebaseFirestore.instance
-        .collection('estudiantes')
-        .where('nickname', isEqualTo: nicknameEstudiante)
-        .get();
-
-    if (estudianteSnapshot.docs.isEmpty) {
-      throw Exception('Estudiante no encontrado');
-    }
-
-    DocumentSnapshot estudianteDoc = estudianteSnapshot.docs.first;
-    String estudianteId = estudianteDoc.id;
-
-    // Obtener tareas asignadas
-    CollectionReference tareasAsignadasRef = FirebaseFirestore.instance
-        .collection('estudiantes')
-        .doc(estudianteId)
-        .collection('tareasAsignadas');
-
-    QuerySnapshot tareasAsignadasSnapshot = await tareasAsignadasRef.get();
-
-    // Convertir tareas a objetos Tarea y agrupar por fecha
-    Map<String, List<Tarea>> tareasPorDia = {};
-    for (var doc in tareasAsignadasSnapshot.docs) {
-      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-      Tarea tarea = Tarea.fromMap(data['tarea']);
-      String fecha =
-          data['fecha']; // Asumiendo que la fecha se añade en el controlador
-
-      if (!tareasPorDia.containsKey(fecha)) {
-        tareasPorDia[fecha] = [];
-      }
-      tareasPorDia[fecha]!.add(tarea);
-    }
-
-    return tareasPorDia;
   }
 
   int _getCurrentDayIndex() {
-    // Implementa la lógica para obtener el índice del día actual
     return DateTime.now().weekday - 1; // Ejemplo: Lunes es 0, Domingo es 6
   }
 
@@ -100,9 +67,10 @@ class _PaginaPrincipalEstudianteState extends State<PaginaPrincipalEstudiante> {
                 setState(() {
                   _currentPage = index;
                 });
+                _loadTareasPorDia(); // Cargar tareas al cambiar de día
               },
               itemBuilder: (context, index) {
-                return _buildDayView(index);
+                return _buildDayView();
               },
             ),
           ),
@@ -141,24 +109,35 @@ class _PaginaPrincipalEstudianteState extends State<PaginaPrincipalEstudiante> {
     );
   }
 
-  Widget _buildDayView(int index) {
-    String fecha = _getFechaPorDia(index);
-    List<Tarea>? tareas = _tareasPorDia[fecha];
-
-    if (tareas == null || tareas.isEmpty) {
+  Widget _buildDayView() {
+    if (_tareasDelDia.isEmpty) {
       return Center(child: Text('No hay tareas asignadas para este día.'));
     }
 
     return ListView.builder(
-      itemCount: tareas.length,
+      itemCount: _tareasDelDia.length,
       itemBuilder: (context, index) {
-        Tarea tarea = tareas[index];
+        Tarea tarea = _tareasDelDia[index];
         return ListTile(
+          leading: Icon(_getIconForTask(tarea.tipo)),
           title: Text(tarea.titulo),
           subtitle: Text(tarea.descripcion),
         );
       },
     );
+  }
+
+  IconData _getIconForTask(String tipo) {
+    switch (tipo) {
+      case 'inventario':
+        return Icons.inventory;
+      case 'por pasos':
+        return Icons.account_tree;
+      case 'comedor':
+        return Icons.restaurant_rounded;
+      default:
+        return Icons.help_outline;
+    }
   }
 
   String _getFechaPorDia(int index) {

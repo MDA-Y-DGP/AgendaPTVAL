@@ -117,54 +117,7 @@ class TareaController {
     }
   }
 
-  Future<void> completarTarea(int idTarea, String nicknameEstudiante) async {
-    // Buscar al estudiante por su nickname
-    QuerySnapshot estudianteSnapshot = await _estudiantesCollection
-        .where('nickname', isEqualTo: nicknameEstudiante)
-        .get();
-
-    if (estudianteSnapshot.docs.isEmpty) {
-      throw Exception('Estudiante no encontrado');
-    }
-
-    DocumentSnapshot estudianteDoc = estudianteSnapshot.docs.first;
-    String estudianteId = estudianteDoc.id;
-
-    // Referencia a la subcolección tareasAsignadas
-    CollectionReference tareasAsignadasRef =
-        _estudiantesCollection.doc(estudianteId).collection('tareasAsignadas');
-
-    // Buscar la tarea en la subcolección tareasAsignadas
-    QuerySnapshot tareasAsignadasSnapshot = await tareasAsignadasRef
-        .where('tarea.idTarea', isEqualTo: idTarea)
-        .get();
-
-    if (tareasAsignadasSnapshot.docs.isEmpty) {
-      throw Exception('Tarea no encontrada en tareas asignadas');
-    }
-
-    // Obtener la tarea
-    DocumentSnapshot tareaDoc = tareasAsignadasSnapshot.docs.first;
-    Map<String, dynamic> tareaData = tareaDoc.data() as Map<String, dynamic>;
-    Tarea tarea = Tarea.fromMap(tareaData['tarea']);
-
-    // Referencia a la subcolección tareasCompletadas
-    CollectionReference tareasCompletadasRef = _estudiantesCollection
-        .doc(estudianteId)
-        .collection('tareasCompletadas');
-
-    // Mover la tarea a tareasCompletadas
-    await tareasCompletadasRef.add({
-      'fecha': DateTime.now().toString(),
-      'tarea': tarea.toMap(),
-    });
-
-    // Eliminar de tareasAsignadas
-    await tareaDoc.reference.delete();
-  }
-
-  Future<void> evaluarTarea(
-      int idTarea, String evaluacion, String nicknameEstudiante) async {
+  Future<void> completarTarea(String idTarea, String nicknameEstudiante) async {
     // Buscar al estudiante por su nickname en la colección estudiantes
     QuerySnapshot estudianteSnapshot = await _estudiantesCollection
         .where('nickname', isEqualTo: nicknameEstudiante)
@@ -181,41 +134,54 @@ class TareaController {
     // Referencia a la subcolección de tareas del estudiante
     CollectionReference tareasRef = _estudiantesCollection
         .doc(estudianteId)
-        .collection('tareasCompletadas');
+        .collection('tareasAsignadas');
 
-    // Obtener todas las tareas de la subcolección
-    QuerySnapshot tareasSnapshot = await tareasRef.get();
+    // Buscar la tarea por su ID en Firestore
+    DocumentSnapshot tareaDoc = await tareasRef.doc(idTarea.toString()).get();
 
-    if (tareasSnapshot.docs.isEmpty) {
-      throw Exception('No hay tareas completadas para este estudiante');
+    // Verificar si la tarea existe
+    if (!tareaDoc.exists) {
+      throw Exception('Tarea con idTarea $idTarea no encontrada en las asignaciones de este estudiante');
     }
 
-    // Buscar la tarea con el idTarea especificado
-    bool tareaEncontrada = false;
-    for (var tareaDoc in tareasSnapshot.docs) {
-      Map<String, dynamic> data = tareaDoc.data() as Map<String, dynamic>;
+    // Actualizar la evaluación de la tarea
+    await tareaDoc.reference.update({
+      'completado': true, // Actualizamos la evaluación directamente
+    });
+  }
 
-      // Acceder al campo 'tarea', que es un mapa
-      Map<String, dynamic> tarea = data['tarea'] ?? {};
+  Future<void> evaluarTarea(
+      String idTarea, String evaluacion, String nicknameEstudiante) async {
+    // Buscar al estudiante por su nickname en la colección estudiantes
+    QuerySnapshot estudianteSnapshot = await _estudiantesCollection
+        .where('nickname', isEqualTo: nicknameEstudiante)
+        .get();
 
-      // Verificar si el idTarea coincide
-      if (tarea['idTarea'] == idTarea) {
-        // Actualizar la evaluación de la tarea
-        tarea['evaluacion'] = evaluacion;
-
-        // Actualizar el documento con la tarea modificada
-        await tareaDoc.reference.update({
-          'tarea': tarea, // Actualizamos la tarea en el documento
-        });
-        tareaEncontrada = true;
-        break;
-      }
+    if (estudianteSnapshot.docs.isEmpty) {
+      throw Exception('Estudiante no encontrado');
     }
 
-    if (!tareaEncontrada) {
-      throw Exception(
-          'Tarea con idTarea $idTarea no encontrada en las asignaciones de este estudiante');
+    // Obtener el ID del documento del estudiante
+    DocumentSnapshot estudianteDoc = estudianteSnapshot.docs.first;
+    String estudianteId = estudianteDoc.id;
+
+    // Referencia a la subcolección de tareas del estudiante
+    CollectionReference tareasRef = _estudiantesCollection
+        .doc(estudianteId)
+        .collection('tareasAsignadas');
+
+    // Buscar la tarea por su ID en Firestore
+    DocumentSnapshot tareaDoc = await tareasRef.doc(idTarea.toString()).get();
+
+    // Verificar si la tarea existe
+    if (!tareaDoc.exists) {
+      throw Exception('Tarea con idTarea $idTarea no encontrada en las asignaciones de este estudiante');
     }
+
+    // Actualizar la evaluación de la tarea
+    await tareaDoc.reference.update({
+      'evaluacion': evaluacion, // Actualizamos la evaluación directamente
+    });
   }
 
   Future<List<Tarea>> obtenerTareasAsignadas(String nicknameEstudiante) async {
@@ -231,22 +197,27 @@ class TareaController {
     DocumentSnapshot estudianteDoc = estudianteSnapshot.docs.first;
     String estudianteId = estudianteDoc.id;
 
-    // Obtener tareas asignadas
+    // Obtener tareas asignadas para ese estudiante
     CollectionReference tareasAsignadasRef =
-        _estudiantesCollection.doc(estudianteId).collection('tareasAsignadas');
+    _estudiantesCollection.doc(estudianteId).collection('tareasAsignadas');
 
     QuerySnapshot tareasAsignadasSnapshot = await tareasAsignadasRef.get();
 
-    // Convertir tareas a objetos Tarea
+    // Convertir tareas a objetos Tarea con su id de Firebase
     List<Tarea> tareasAsignadas = tareasAsignadasSnapshot.docs.map((doc) {
-      return Tarea.fromMap(doc['tarea']);
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+
+      // Crear un objeto Tarea con los datos de cada tarea e incluir el id de Firebase
+      Tarea tarea = Tarea.fromMap(data);
+      tarea.idFirebase = doc.id; // Asignar el id del documento de Firebase
+
+      return tarea;
     }).toList();
 
     return tareasAsignadas;
   }
 
-  Future<List<Tarea>> obtenerTareasCompletadas(
-      String nicknameEstudiante) async {
+  Future<List<Tarea>> obtenerTareasAsignadasPorFecha(String fecha, String nicknameEstudiante) async {
     // Buscar al estudiante
     QuerySnapshot estudianteSnapshot = await _estudiantesCollection
         .where('nickname', isEqualTo: nicknameEstudiante)
@@ -259,26 +230,103 @@ class TareaController {
     DocumentSnapshot estudianteDoc = estudianteSnapshot.docs.first;
     String estudianteId = estudianteDoc.id;
 
-    // Obtener tareas completadas
-    CollectionReference tareasCompletadasRef = _estudiantesCollection
-        .doc(estudianteId)
-        .collection('tareasCompletadas');
+    // Obtener tareas asignadas para ese estudiante y fecha
+    CollectionReference tareasAsignadasRef =
+    _estudiantesCollection.doc(estudianteId).collection('tareasAsignadas');
 
-    QuerySnapshot tareasCompletadasSnapshot = await tareasCompletadasRef.get();
+    QuerySnapshot tareasAsignadasSnapshot = await tareasAsignadasRef.where('fecha', isEqualTo: fecha).get();
 
-    // Convertir tareas a objetos Tarea
-    List<Tarea> tareasCompletadas = tareasCompletadasSnapshot.docs.map((doc) {
-      return Tarea.fromMap(doc['tarea']);
+    // Convertir tareas a objetos Tarea con su id de Firebase
+    List<Tarea> tareasAsignadas = tareasAsignadasSnapshot.docs.map((doc) {
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+
+      // Crear un objeto Tarea con los datos de cada tarea e incluir el id de Firebase
+      Tarea tarea = Tarea.fromMap(data);
+      tarea.idFirebase = doc.id; // Asignar el id del documento de Firebase
+
+      return tarea;
     }).toList();
 
-    return tareasCompletadas;
+    return tareasAsignadas;
+  }
+
+
+  Future<List<Tarea>> obtenerTareasCompletadas(String nicknameEstudiante) async {
+    // Buscar al estudiante
+    QuerySnapshot estudianteSnapshot = await _estudiantesCollection
+        .where('nickname', isEqualTo: nicknameEstudiante)
+        .get();
+
+    if (estudianteSnapshot.docs.isEmpty) {
+      throw Exception('Estudiante no encontrado');
+    }
+
+    DocumentSnapshot estudianteDoc = estudianteSnapshot.docs.first;
+    String estudianteId = estudianteDoc.id;
+
+    // Obtener tareas asignadas para ese estudiante y fecha
+    CollectionReference tareasAsignadasRef =
+    _estudiantesCollection.doc(estudianteId).collection('tareasAsignadas');
+
+    QuerySnapshot tareasAsignadasSnapshot = await tareasAsignadasRef
+        .where('completado', isEqualTo: true)
+        .get();
+
+    // Convertir tareas a objetos Tarea con su id de Firebase
+    List<Tarea> tareasAsignadas = tareasAsignadasSnapshot.docs.map((doc) {
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+
+      // Crear un objeto Tarea con los datos de cada tarea e incluir el id de Firebase
+      Tarea tarea = Tarea.fromMap(data);
+      tarea.idFirebase = doc.id; // Asignar el id del documento de Firebase
+
+      return tarea;
+    }).toList();
+
+    return tareasAsignadas;
+  }
+
+  Future<List<Tarea>> obtenerTareasCompletadasSinEvaluar(String nicknameEstudiante) async {
+    // Buscar al estudiante
+    QuerySnapshot estudianteSnapshot = await _estudiantesCollection
+        .where('nickname', isEqualTo: nicknameEstudiante)
+        .get();
+
+    if (estudianteSnapshot.docs.isEmpty) {
+      throw Exception('Estudiante no encontrado');
+    }
+
+    DocumentSnapshot estudianteDoc = estudianteSnapshot.docs.first;
+    String estudianteId = estudianteDoc.id;
+
+    // Obtener tareas asignadas para ese estudiante y fecha
+    CollectionReference tareasAsignadasRef =
+    _estudiantesCollection.doc(estudianteId).collection('tareasAsignadas');
+
+    QuerySnapshot tareasAsignadasSnapshot = await tareasAsignadasRef
+        .where('completado', isEqualTo: true)
+        .where('evaluacion', isNull: true)  // Verifica que el campo 'evaluacion' sea null
+        .get();
+
+    // Convertir tareas a objetos Tarea con su id de Firebase
+    List<Tarea> tareasAsignadas = tareasAsignadasSnapshot.docs.map((doc) {
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+
+      // Crear un objeto Tarea con los datos de cada tarea e incluir el id de Firebase
+      Tarea tarea = Tarea.fromMap(data);
+      tarea.idFirebase = doc.id; // Asignar el id del documento de Firebase
+
+      return tarea;
+    }).toList();
+
+    return tareasAsignadas;
   }
 
   Future<void> borrarTarea(int idTarea) async {
     try {
       // Borrar la tarea de la colección principal
       QuerySnapshot tareaSnapshot =
-          await _tareasCollection.where('idTarea', isEqualTo: idTarea).get();
+      await _tareasCollection.where('idTarea', isEqualTo: idTarea).get();
 
       if (tareaSnapshot.docs.isNotEmpty) {
         await tareaSnapshot.docs.first.reference.delete();

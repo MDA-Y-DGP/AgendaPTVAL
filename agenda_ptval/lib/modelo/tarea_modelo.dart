@@ -5,6 +5,8 @@ class Tarea {
   final String tipo;
   final List<String>? pasos; // Array de pasos
   String? evaluacion;
+  String? fecha;
+  String? idFirebase;
 
   Tarea({
     required this.idTarea,
@@ -13,6 +15,8 @@ class Tarea {
     required this.tipo,
     this.pasos,
     this.evaluacion,
+    this.fecha,
+    this.idFirebase,
   });
 
   Map<String, dynamic> toMap() {
@@ -23,6 +27,8 @@ class Tarea {
       'tipo': tipo,
       'pasos': pasos,
       'evaluacion': evaluacion,
+      'fecha': fecha,
+      'idFirebase': idFirebase,
     };
   }
 
@@ -34,6 +40,8 @@ class Tarea {
       tipo: map['tipo'],
       pasos: List<String>.from(map['pasos'] ?? []),
       evaluacion: map['evaluacion'],
+      fecha: map['fecha'],
+      idFirebase: map['idFirebase'],
     );
   }
 }
