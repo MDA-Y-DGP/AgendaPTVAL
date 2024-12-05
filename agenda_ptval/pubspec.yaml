@@ -81,6 +81,15 @@ flutter:
     - assets/pictograma_contrasena4.png
     - assets/pictograma_contrasena5.png
     - assets/pictograma_contrasena6.png
+    - assets/pictograma_comedor.png
+    - assets/pictograma_inventario.png
+    - assets/pictograma_completado.png
+    - assets/pictograma_pasos.png
+    - assets/pictograma_lunes.png
+    - assets/pictograma_martes.png
+    - assets/pictograma_miercoles.png
+    - assets/pictograma_jueves.png
+    - assets/pictograma_viernes.png
 
 scripts:
   web: flutter run -d chrome --web-renderer html

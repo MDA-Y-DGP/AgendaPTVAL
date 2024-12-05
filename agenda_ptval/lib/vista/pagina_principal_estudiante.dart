@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../modelo/tarea_modelo.dart'; // Importa el modelo de Tarea
 import '../controlador/tarea_controller.dart'; // Importa la función obtenerTareasAsignadasPorFecha
 import 'inicio_sesion_estudiante.dart';
+import 'realizar_comanda.dart'; // Importa la vista realizar_comanda.dart
 
 class PaginaPrincipalEstudiante extends StatefulWidget {
   final String nickname;
@@ -35,8 +36,8 @@ class _PaginaPrincipalEstudianteState extends State<PaginaPrincipalEstudiante> {
   Future<void> _loadTareasPorDia() async {
     String fecha = _getFechaPorDia(_currentPage);
     try {
-      List<Tarea> tareasData =
-      await _tareaController.obtenerTareasAsignadasPorFecha(fecha, widget.nickname);
+      List<Tarea> tareasData = await _tareaController
+          .obtenerTareasAsignadasPorFecha(fecha, widget.nickname);
       setState(() {
         _tareasDelDia = tareasData;
 
@@ -87,101 +88,151 @@ class _PaginaPrincipalEstudianteState extends State<PaginaPrincipalEstudiante> {
     );
   }
 
-  Widget _buildHeader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            if (_currentPage > 0) {
-              _pageController.previousPage(
-                  duration: Duration(milliseconds: 300), curve: Curves.ease);
-            }
-          },
-        ),
-        Text(
-          _getNombreDia(_currentPage),
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-        IconButton(
-          icon: Icon(Icons.arrow_forward),
-          onPressed: () {
-            if (_currentPage < 4) {
-              _pageController.nextPage(
-                  duration: Duration(milliseconds: 300), curve: Curves.ease);
-            }
-          },
-        ),
-      ],
-    );
-  }
-
   Widget _buildDayView() {
-    if (_tareasDelDia.isEmpty) {
-      return Center(child: Text('No hay tareas asignadas para este día.'));
-    }
-
     return ListView.builder(
       itemCount: _tareasDelDia.length,
       itemBuilder: (context, index) {
         Tarea tarea = _tareasDelDia[index];
-        bool isCompletada = _tareasCompletadas[tarea.idTarea] ?? false;
-        return ListTile(
-          leading: Icon(_getIconForTask(tarea.tipo)),
-          title: Text(
-            tarea.titulo,
-            style: TextStyle(
-              color: isCompletada ? Colors.grey : Colors.black,
-              decoration: isCompletada ? TextDecoration.lineThrough : null,
-            ),
-          ),
-          subtitle: Text(
-            tarea.descripcion,
-            style: TextStyle(
-              color: isCompletada ? Colors.grey : Colors.black,
-              decoration: isCompletada ? TextDecoration.lineThrough : null,
-            ),
-          ),
-          trailing: Checkbox(
-            value: isCompletada,
-            activeColor: Colors.blue, // Color del check cuando está marcado
-            onChanged: (bool? value) {
-              if (value != null) {
-                setState(() {
-                  _tareasCompletadas[tarea.idTarea] = value; // Actualizamos el estado del checkbox
-                });
-                // Llamamos a completarTarea con el idFirebase de la tarea específica
-                _tareaController.completarTarea(tarea.idFirebase!, widget.nickname); // Pasamos el idFirebase directamente de la tarea
-              }
-            },
-          ),
-          onTap: isCompletada
-              ? null // Deshabilitar el tap si la tarea está completada
-              : () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => InicioSesionEstudiante(),
+        return Row(
+          mainAxisAlignment:
+              MainAxisAlignment.center, // Centra los elementos en el Row
+          children: [
+            GestureDetector(
+              onTap: () {
+                if (tarea.tipo == 'comedor') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => RealizarComanda(),
+                    ),
+                  );
+                }
+              },
+              child: Container(
+                width: 200,
+                height: 200,
+                margin:
+                    EdgeInsets.only(bottom: 10), // Espacio entre los elementos
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: ColorFiltered(
+                  colorFilter: ColorFilter.mode(
+                    _tareasCompletadas[tarea.idTarea]!
+                        ? Colors.grey
+                        : Colors.transparent,
+                    BlendMode.saturation,
+                  ),
+                  child: _getPictogramaTarea(tarea),
+                ),
               ),
-            );
-          },
+            ),
+            SizedBox(width: 10), // Espacio entre los contenedores
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  _tareasCompletadas[tarea.idTarea] =
+                      !_tareasCompletadas[tarea.idTarea]!;
+                });
+              },
+              child: Container(
+                width: 100,
+                height: 100,
+                margin: EdgeInsets.only(bottom: 10), // Asegura el mismo margen
+                decoration: BoxDecoration(
+                  color: Colors.orange,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Image.asset(
+                  'assets/pictograma_completado.png',
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          ],
         );
       },
     );
   }
 
-  IconData _getIconForTask(String tipo) {
-    switch (tipo) {
-      case 'inventario':
-        return Icons.inventory;
-      case 'por pasos':
-        return Icons.account_tree;
+  Widget _getPictogramaTarea(Tarea tarea) {
+    switch (tarea.tipo) {
       case 'comedor':
-        return Icons.restaurant_rounded;
+        return Image.asset(
+          'assets/pictograma_comedor.png',
+          fit: BoxFit.cover,
+        );
+      case 'inventario':
+        return Image.asset(
+          'assets/pictograma_inventario.png',
+          fit: BoxFit.cover,
+        );
+      case 'por pasos':
+        return Image.asset(
+          'assets/pictograma_pasos.png',
+          fit: BoxFit.cover,
+        );
       default:
-        return Icons.help_outline;
+        return Center(
+          child: Text(
+            tarea.titulo,
+            style: TextStyle(color: Colors.white),
+            textAlign: TextAlign.center,
+          ),
+        );
     }
+  }
+
+  Widget _buildHeader() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          children: [
+            IconButton(
+              icon: Icon(Icons.arrow_back,
+                  size: 60), // Aumenta el tamaño del icono
+              onPressed: () {
+                if (_currentPage > 0) {
+                  _pageController.previousPage(
+                      duration: Duration(milliseconds: 300),
+                      curve: Curves.ease);
+                }
+              },
+            ),
+            Text(
+              'Día anterior',
+              style: TextStyle(fontSize: 20),
+            ),
+          ],
+        ),
+        Image.asset(
+          _getPictogramaDia(_currentPage),
+          width: 200, // Ajusta el tamaño de la imagen
+          height: 200, // Ajusta el tamaño de la imagen
+        ),
+        Row(
+          children: [
+            Text(
+              'Día siguiente',
+              style: TextStyle(fontSize: 20),
+            ),
+            IconButton(
+              icon: Icon(Icons.arrow_forward,
+                  size: 60), // Aumenta el tamaño del icono
+              onPressed: () {
+                if (_currentPage < 4) {
+                  _pageController.nextPage(
+                      duration: Duration(milliseconds: 300),
+                      curve: Curves.ease);
+                }
+              },
+            ),
+          ],
+        ),
+      ],
+    );
   }
 
   String _getFechaPorDia(int index) {
@@ -190,18 +241,18 @@ class _PaginaPrincipalEstudianteState extends State<PaginaPrincipalEstudiante> {
     return '${fecha.year}-${fecha.month.toString().padLeft(2, '0')}-${fecha.day.toString().padLeft(2, '0')}';
   }
 
-  String _getNombreDia(int index) {
+  String _getPictogramaDia(int index) {
     switch (index) {
       case 0:
-        return 'Lunes';
+        return 'assets/pictograma_lunes.png';
       case 1:
-        return 'Martes';
+        return 'assets/pictograma_martes.png';
       case 2:
-        return 'Miércoles';
+        return 'assets/pictograma_miercoles.png';
       case 3:
-        return 'Jueves';
+        return 'assets/pictograma_jueves.png';
       case 4:
-        return 'Viernes';
+        return 'assets/pictograma_viernes.png';
       default:
         return '';
     }
