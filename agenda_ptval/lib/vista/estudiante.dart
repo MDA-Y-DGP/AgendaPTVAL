@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:agenda_ptval/controlador/estudiante_controller.dart';
 import 'package:agenda_ptval/modelo/estudiante_modelo.dart';
-import 'registro_estudiante.dart';
+import 'modificar_estudiante.dart'; // Importa la vista de modificar estudiante
+import 'registro_estudiante.dart'; // Importa la vista de registro de estudiante
 
 class ListaEstudiantes extends StatefulWidget {
   @override
@@ -19,33 +20,25 @@ class _ListaEstudiantesState extends State<ListaEstudiantes> {
   }
 
   Future<void> _cargarEstudiantes() async {
-    List<Estudiante> estudiantesObtenidos = await _controller.obtenerTodosEstudiantes();
-    estudiantesObtenidos.sort((a, b) => a.nickname.compareTo(b.nickname)); // Ordenar alfabéticamente
+    List<Estudiante> estudiantesObtenidos =
+        await _controller.obtenerTodosEstudiantes();
+    estudiantesObtenidos.sort(
+        (a, b) => a.nickname.compareTo(b.nickname)); // Ordenar alfabéticamente
     setState(() {
       estudiantes = estudiantesObtenidos;
     });
   }
 
   Future<void> _eliminarEstudiante(String id) async {
-    try {
-      await _controller.eliminarEstudiante(id);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Estudiante eliminado con éxito!')),
-      );
-      _cargarEstudiantes(); // Recargar la lista de estudiantes
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al eliminar estudiante: $e')),
-      );
-    }
+    await _controller.eliminarEstudiante(id);
+    _cargarEstudiantes();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Lista de Estudiantes'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        title: Text('Lista de Estudiantes'),
       ),
       body: ListView.builder(
         itemCount: estudiantes.length,
@@ -59,9 +52,29 @@ class _ListaEstudiantesState extends State<ListaEstudiantes> {
               ),
               title: Text(estudiante.nickname),
               subtitle: Text('Grado: ${estudiante.gradoAprendizaje}'),
-              trailing: IconButton(
-                icon: Icon(Icons.delete, color: Colors.red),
-                onPressed: () => _eliminarEstudiante(estudiante.idEstudiante.toString()),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.edit, color: Colors.blue),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              ModificarEstudiante(estudiante: estudiante),
+                        ),
+                      ).then((_) {
+                        _cargarEstudiantes();
+                      });
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.delete, color: Colors.red),
+                    onPressed: () =>
+                        _eliminarEstudiante(estudiante.idEstudiante.toString()),
+                  ),
+                ],
               ),
             ),
           );
