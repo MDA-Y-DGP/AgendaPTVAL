@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Agenda PTVAL',
       theme: ThemeData(
-        fontFamily: 'Scholar', // Establecer la fuente predeterminada
+        fontFamily: 'Schoolar', // Establecer la fuente predeterminada
         colorScheme: ColorScheme.light(
           primary: Colors.blueAccent,
           secondary: Colors.orangeAccent,
