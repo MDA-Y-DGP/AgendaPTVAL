@@ -228,7 +228,7 @@ class _CrearTareaState extends State<CrearTarea> {
         if (_formKey.currentState!.validate()) {
           if (_tipo == 'por pasos') {
             if (_perfilFile != null || _perfilBytes != null) {
-              String? urlPerfil = await _subirImagenPaso(_perfilFile, _perfilBytes, 0);
+              //String? urlPerfil = await _subirImagenPaso(_perfilFile, _perfilBytes, 0);
               // Guardar la URL de la imagen de perfil en la tarea
             }
 

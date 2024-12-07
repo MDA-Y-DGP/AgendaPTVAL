@@ -32,13 +32,14 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Agenda PTVAL',
       theme: ThemeData(
+        fontFamily: 'Scholar', // Establecer la fuente predeterminada
         colorScheme: ColorScheme.light(
           primary: Colors.blueAccent,
           secondary: Colors.orangeAccent,
           surface: Colors.lightBlue[50]!,
         ),
-        textTheme: const TextTheme(
-          bodyMedium: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        textTheme: TextTheme(
+          bodyMedium: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
         ),
       ),
       home: MyHomePage(title: 'Agenda PTVAL', firestore: firestore),
