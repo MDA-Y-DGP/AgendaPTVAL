@@ -273,48 +273,55 @@ class _InicioSesionEstudianteState extends State<InicioSesionEstudiante> {
 
   // Muestra todas las fotos con nombres debajo
 Widget _buildStudentGrid() {
-  return GridView.builder(
-    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-      crossAxisCount: 3,
-      childAspectRatio: 0.75,
-    ),
-    itemCount: estudiantes.length,
-    itemBuilder: (context, index) {
-      final estudiante = estudiantes[index];
-      return GestureDetector(
-        onTap: () => _seleccionarEstudiante(estudiante),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            FutureBuilder<String>(
-              future: _imagenController.obtenerFotoPerfil(estudiante['nickname']),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const CircleAvatar(
-                    radius: 40,
-                    child: CircularProgressIndicator(),
-                  );
-                } else if (snapshot.hasError || !snapshot.hasData) {
-                  return const CircleAvatar(
-                    radius: 40,
-                    backgroundImage: AssetImage('assets/default_profile.png'),
-                  );
-                } else {
-                  return CircleAvatar(
-                    radius: 40,
-                    backgroundImage: NetworkImage(snapshot.data!),
-                  );
-                }
-              },
-            ),
-            const SizedBox(height: 8),
-            Text(
-              estudiante['nickname'] ?? 'Sin nombre',
-              style: const TextStyle(fontSize: 16),
-              textAlign: TextAlign.center,
-            ),
-          ],
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      int crossAxisCount = (constraints.maxWidth / 120).floor(); // Ajusta el número de columnas según el ancho disponible
+      return GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: crossAxisCount,
+          crossAxisSpacing: 20, // Más espacio entre columnas
+          mainAxisSpacing: 12, // Menos espacio entre filas
+          childAspectRatio: 0.75,
         ),
+        itemCount: estudiantes.length,
+        itemBuilder: (context, index) {
+          final estudiante = estudiantes[index];
+          return GestureDetector(
+            onTap: () => _seleccionarEstudiante(estudiante),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                FutureBuilder<String>(
+                  future: _imagenController.obtenerFotoPerfil(estudiante['nickname']),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircleAvatar(
+                        radius: 40,
+                        child: CircularProgressIndicator(),
+                      );
+                    } else if (snapshot.hasError || !snapshot.hasData) {
+                      return const CircleAvatar(
+                        radius: 40,
+                        backgroundImage: AssetImage('assets/default_profile.png'),
+                      );
+                    } else {
+                      return CircleAvatar(
+                        radius: 40,
+                        backgroundImage: NetworkImage(snapshot.data!),
+                      );
+                    }
+                  },
+                ),
+                const SizedBox(height: 4), // Reduce el espacio entre la imagen y el texto
+                Text(
+                  estudiante['nickname'] ?? 'Sin nombre',
+                  style: const TextStyle(fontSize: 14), // Reduce el tamaño del texto
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          );
+        },
       );
     },
   );
@@ -331,7 +338,7 @@ Widget _buildStudentGrid() {
         elevation: 0,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(26.0),
+        padding: const EdgeInsets.all(16.0),
         child: estudianteSeleccionado == null
             ? _buildStudentGrid()
             : SingleChildScrollView(

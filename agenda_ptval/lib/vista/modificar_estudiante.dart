@@ -35,6 +35,7 @@ class _ModificarEstudianteState extends State<ModificarEstudiante> {
   Uint8List? imagenBytes;
   late String contrasena;
   String? imagenUrl;
+  bool _mostrarContrasena = false;
 
   List<Clase> clases = []; // Lista para almacenar las clases
 
@@ -56,7 +57,7 @@ class _ModificarEstudianteState extends State<ModificarEstudiante> {
     nickname = widget.estudiante.nickname;
     gradoAprendizaje = widget.estudiante.gradoAprendizaje;
     claseAsignada = widget.estudiante.idClase.toString();
-    contrasena = widget.estudiante.contrasena; // Inicializamos la contraseña con el valor existente
+    contrasena = ''; // Inicializamos la contraseña en blanco
     imagenUrl = await _imagenController.obtenerFotoPerfil(nickname); // Inicializamos la URL de la imagen existente
     setState(() {});
   }
@@ -118,7 +119,7 @@ class _ModificarEstudianteState extends State<ModificarEstudiante> {
         'nickname': nickname,
         'grado_aprendizaje': gradoAprendizaje,
         'id_clase': int.parse(claseAsignada!),
-        'contrasena': contrasena.isNotEmpty && contrasena != widget.estudiante.contrasena ? hashPassword(contrasena) : widget.estudiante.contrasena,
+        'contrasena': contrasena.isNotEmpty ? hashPassword(contrasena) : widget.estudiante.contrasena,
         // Añadir otros campos necesarios
       };
 
@@ -136,6 +137,50 @@ class _ModificarEstudianteState extends State<ModificarEstudiante> {
     }
   }
 
+  Future<void> _eliminarEstudiante() async {
+    try {
+      await _controller.eliminarEstudiante(widget.estudiante.idEstudiante.toString());
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Estudiante eliminado con éxito!')),
+      );
+      Navigator.pop(context);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al eliminar el estudiante: $e')),
+      );
+    }
+  }
+
+  void _confirmarEliminacion() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirmar Eliminación'),
+          content: const Text('¿Estás seguro de que deseas eliminar este estudiante?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _eliminarEstudiante();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+              ),
+              child: const Text('Eliminar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildTextFormField({
     required String labelText,
     required Function(String?) onSaved,
@@ -149,6 +194,18 @@ class _ModificarEstudianteState extends State<ModificarEstudiante> {
       decoration: InputDecoration(
         labelText: labelText,
         border: const OutlineInputBorder(),
+        suffixIcon: labelText == 'Contraseña'
+            ? IconButton(
+                icon: Icon(
+                  _mostrarContrasena ? Icons.visibility : Icons.visibility_off,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _mostrarContrasena = !_mostrarContrasena;
+                  });
+                },
+              )
+            : null,
       ),
       onSaved: onSaved,
       validator: validator,
@@ -201,6 +258,25 @@ class _ModificarEstudianteState extends State<ModificarEstudiante> {
     );
   }
 
+  Widget _buildProfileImage() {
+    return Container(
+      width: 100,
+      height: 100,
+      decoration: BoxDecoration(
+        shape: BoxShape.rectangle,
+        borderRadius: BorderRadius.circular(10),
+        image: DecorationImage(
+          fit: BoxFit.cover,
+          image: imagen != null
+              ? FileImage(imagen!)
+              : imagenBytes != null
+                  ? MemoryImage(imagenBytes!) as ImageProvider
+                  : NetworkImage(imagenUrl ?? 'assets/default_profile.png'),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -234,12 +310,7 @@ class _ModificarEstudianteState extends State<ModificarEstudiante> {
               const SizedBox(height: 16),
               _buildClaseDropdownButtonFormField(),
               const SizedBox(height: 16),
-              if (imagen != null)
-                Image.file(imagen!, height: 200)
-              else if (imagenBytes != null)
-                Image.memory(imagenBytes!, height: 200)
-              else if (imagenUrl != null)
-                Image.network(imagenUrl!, height: 200),
+              Center(child: _buildProfileImage()),
               ListTile(
                 title: Text(imagen == null && imagenBytes == null ? 'Selecciona una imagen (opcional)' : 'Imagen seleccionada'),
                 trailing: const Icon(Icons.image),
@@ -249,24 +320,21 @@ class _ModificarEstudianteState extends State<ModificarEstudiante> {
               _buildTextFormField(
                 labelText: 'Contraseña',
                 onSaved: (value) {
-                  if (value!.isNotEmpty && value != widget.estudiante.contrasena) {
+                  if (value!.isNotEmpty) {
                     contrasena = value;
                   }
                 },
                 validator: (value) {
-                  if (value!.isEmpty && contrasena.isEmpty) {
-                    return 'Ingresa una contraseña';
-                  }
-                  if ((gradoAprendizaje == 'bajo' || gradoAprendizaje == 'medio') && !RegExp(r'^[1-6]{4}$').hasMatch(value)) {
+                  if ((gradoAprendizaje == 'bajo' || gradoAprendizaje == 'medio') && !RegExp(r'^[1-6]{4}$').hasMatch(value!)) {
                     return 'La contraseña debe ser de 4 dígitos entre 1 y 6';
                   }
                   return null;
                 },
-                obscureText: true,
+                obscureText: !_mostrarContrasena,
                 inputFormatters: (gradoAprendizaje == 'bajo' || gradoAprendizaje == 'medio')
                     ? [FilteringTextInputFormatter.allow(RegExp(r'[1-6]')), LengthLimitingTextInputFormatter(4)]
                     : null,
-                initialValue: widget.estudiante.contrasena,
+                initialValue: '', // Dejar el campo de contraseña en blanco
               ),
               const SizedBox(height: 20),
               ElevatedButton(
@@ -292,6 +360,23 @@ class _ModificarEstudianteState extends State<ModificarEstudiante> {
                   ),
                 ),
                 child: const Text('Actualizar Estudiante', style: TextStyle(color: Colors.white)),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _confirmarEliminacion,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  textStyle: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white, // Color del texto
+                  ),
+                ),
+                child: const Text('Eliminar Estudiante', style: TextStyle(color: Colors.white)),
               ),
             ],
           ),

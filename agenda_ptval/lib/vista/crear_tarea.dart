@@ -26,6 +26,9 @@ class _CrearTareaState extends State<CrearTarea> {
   File? _mediaFile;
   Uint8List? _mediaBytes;
   String? _mediaFileName;
+  File? _perfilFile;
+  Uint8List? _perfilBytes;
+  String? _perfilFileName;
   final ImagePicker _picker = ImagePicker();
 
   @override
@@ -51,6 +54,8 @@ class _CrearTareaState extends State<CrearTarea> {
                 _buildDropdownButtonFormField(),
                 const SizedBox(height: 16),
                 if (_tipo == 'por pasos') ...[
+                  _buildPerfilField(),
+                  const SizedBox(height: 16),
                   _buildPasosList(),
                   _buildAddPasoField(),
                   const SizedBox(height: 10),
@@ -63,6 +68,30 @@ class _CrearTareaState extends State<CrearTarea> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildPerfilField() {
+    return Column(
+      children: [
+        const SizedBox(height: 16), // Añadir separación
+        InputDecorator(
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            labelText: 'Imagen de Perfil',
+          ),
+          child: Container(
+            height: 40, // Ajusta la altura según sea necesario
+            child: ListTile(
+              title: Text(_perfilFile == null && _perfilBytes == null
+                  ? 'Selecciona una imagen de perfil'
+                  : 'Imagen seleccionada: $_perfilFileName'),
+              trailing: const Icon(Icons.image),
+              onTap: _pickPerfil,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -103,7 +132,7 @@ class _CrearTareaState extends State<CrearTarea> {
       controller: controller,
       decoration: InputDecoration(
         labelText: labelText,
-        border: OutlineInputBorder(),
+        border: const OutlineInputBorder(),
       ),
       validator: (value) {
         if (value == null || value.isEmpty) {
@@ -147,10 +176,7 @@ class _CrearTareaState extends State<CrearTarea> {
           itemCount: _pasos.length,
           itemBuilder: (context, index) {
             return ListTile(
-              title: Text(_pasos[index]['texto']),
-              subtitle: _pasos[index]['urlMedia'] != null
-                  ? Text('Media: ${_pasos[index]['urlMedia']}')
-                  : null,
+              title: Text('${index + 1}. ${_pasos[index]['texto']}'),
             );
           },
         ),
@@ -163,7 +189,7 @@ class _CrearTareaState extends State<CrearTarea> {
       onPressed: () async {
         if (_nuevoPasoController.text.isNotEmpty) {
           String? urlMedia = _mediaFile != null || _mediaBytes != null
-              ? await _subirImagenPaso(_mediaFile, _mediaBytes, _pasos.length)
+              ? await _subirImagenPaso(_mediaFile, _mediaBytes, _pasos.length + 1)
               : null;
 
           setState(() {
@@ -201,12 +227,17 @@ class _CrearTareaState extends State<CrearTarea> {
       onPressed: () async {
         if (_formKey.currentState!.validate()) {
           if (_tipo == 'por pasos') {
+            if (_perfilFile != null || _perfilBytes != null) {
+              String? urlPerfil = await _subirImagenPaso(_perfilFile, _perfilBytes, 0);
+              // Guardar la URL de la imagen de perfil en la tarea
+            }
+
             for (var i = 0; i < _pasos.length; i++) {
               var paso = _pasos[i];
               if (paso['urlMedia'] == null &&
                   (paso['mediaFile'] != null || paso['mediaBytes'] != null)) {
                 String? urlMedia = await _subirImagenPaso(
-                    paso['mediaFile'], paso['mediaBytes'], i);
+                    paso['mediaFile'], paso['mediaBytes'], i + 1);
                 paso['urlMedia'] = urlMedia;
               }
             }
@@ -268,11 +299,35 @@ class _CrearTareaState extends State<CrearTarea> {
     }
   }
 
+  Future<void> _pickPerfil() async {
+    try {
+      final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+      if (pickedFile != null) {
+        if (kIsWeb) {
+          final bytes = await pickedFile.readAsBytes();
+          setState(() {
+            _perfilBytes = bytes;
+            _perfilFileName = pickedFile.name;
+          });
+        } else {
+          setState(() {
+            _perfilFile = File(pickedFile.path);
+            _perfilFileName = pickedFile.path.split('/').last;
+          });
+        }
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al seleccionar la imagen de perfil: $e')),
+      );
+    }
+  }
+
   Future<String?> _subirImagenPaso(
       File? mediaFile, Uint8List? mediaBytes, int pasoIndex) async {
     if (mediaFile != null || mediaBytes != null) {
       try {
-        String nombreArchivo = _mediaFileName ?? '';
+        String nombreArchivo = pasoIndex == 0 ? _perfilFileName ?? '' : _mediaFileName ?? '';
         if (RegExp(r'^\d+$').hasMatch(nombreArchivo)) {
           return null;
         }
