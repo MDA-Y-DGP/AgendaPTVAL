@@ -30,6 +30,7 @@ class TareaController {
       descripcion: tarea.descripcion,
       tipo: tarea.tipo,
       pasos: tarea.pasos,
+      mediaUrls: tarea.mediaUrls,
     );
 
     // Guardar la nueva tarea en Firestore, dejando que Firebase asigne el ID del documento

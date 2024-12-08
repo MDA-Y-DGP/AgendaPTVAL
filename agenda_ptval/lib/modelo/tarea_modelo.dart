@@ -4,6 +4,7 @@ class Tarea {
   final String descripcion;
   final String tipo;
   final List<String>? pasos; // Array de pasos
+  final List<List<String?>>? mediaUrls; // Array of media URLs for each step
   String? evaluacion;
   String? fecha;
   String? idFirebase;
@@ -15,6 +16,7 @@ class Tarea {
     required this.descripcion,
     required this.tipo,
     this.pasos,
+    this.mediaUrls,
     this.evaluacion,
     this.fecha,
     this.idFirebase,
@@ -28,6 +30,7 @@ class Tarea {
       'descripcion': descripcion,
       'tipo': tipo,
       'pasos': pasos,
+      'mediaUrls': mediaUrls,
       'evaluacion': evaluacion,
       'fecha': fecha,
       'idFirebase': idFirebase,
@@ -42,6 +45,9 @@ class Tarea {
       descripcion: map['descripcion'],
       tipo: map['tipo'],
       pasos: List<String>.from(map['pasos'] ?? []),
+      mediaUrls: (map['mediaUrls'] as List<dynamic>?)
+          ?.map((e) => List<String?>.from(e))
+          .toList(),
       evaluacion: map['evaluacion'],
       fecha: map['fecha'],
       idFirebase: map['idFirebase'],
