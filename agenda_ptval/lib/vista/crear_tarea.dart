@@ -26,6 +26,12 @@ class _CrearTareaState extends State<CrearTarea> {
   List<File?> _mediaFiles = [];
   List<Uint8List?> _mediaBytesList = [];
   List<String?> _mediaFileNames = [];
+  List<File?> _imageFiles = [];
+  List<Uint8List?> _imageBytesList = [];
+  List<String?> _imageFileNames = [];
+  List<File?> _videoFiles = [];
+  List<Uint8List?> _videoBytesList = [];
+  List<String?> _videoFileNames = [];
   File? _mediaFile;
   Uint8List? _mediaBytes;
   String? _mediaFileName;
@@ -114,38 +120,95 @@ class _CrearTareaState extends State<CrearTarea> {
           decoration: const InputDecoration(
             border: OutlineInputBorder(),
           ),
-          child: Container(
-            height: 100, // Ajusta la altura según sea necesario
-            child: Column(
-              children: [
-                ListTile(
-                  title: Text(_mediaFiles.isEmpty && _mediaBytesList.isEmpty
-                      ? 'Selecciona imágenes/videos'
-                      : 'Media seleccionada: ${_mediaFileNames.join(", ")}'),
-                  trailing: const Icon(Icons.image),
-                  onTap: _pickMedia,
-                ),
-                const SizedBox(height: 10),
-                Expanded(
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: _mediaFiles.length,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.all(4.0),
-                        child: kIsWeb
-                            ? Image.memory(_mediaBytesList[index]!, width: 50, height: 50)
-                            : Image.file(_mediaFiles[index]!, width: 50, height: 50),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
+          child: Column(
+            children: [
+              ListTile(
+                title: _imageFiles.isEmpty && _imageBytesList.isEmpty
+                    ? const Text('Selecciona imágen')
+                    : Row(
+                        children: List.generate(_imageFiles.length, (index) {
+                          return Padding(
+                            padding: const EdgeInsets.all(4.0),
+                            child: kIsWeb
+                                ? Image.memory(_imageBytesList[index]!, width: 50, height: 50)
+                                : Image.file(_imageFiles[index]!, width: 50, height: 50),
+                          );
+                        }),
+                      ),
+                trailing: const Icon(Icons.image),
+                onTap: _pickImage,
+              ),
+              const SizedBox(height: 10),
+              ListTile(
+                title: _videoFiles.isEmpty && _videoBytesList.isEmpty
+                    ? const Text('Selecciona video')
+                    : Row(
+                        children: List.generate(_videoFiles.length, (index) {
+                          return Padding(
+                            padding: const EdgeInsets.all(4.0),
+                            child: kIsWeb
+                                ? Icon(Icons.video_library, size: 50)
+                                : Icon(Icons.video_library, size: 50),
+                          );
+                        }),
+                      ),
+                trailing: const Icon(Icons.video_library),
+                onTap: _pickVideo,
+              ),
+              const SizedBox(height: 10),
+            ],
           ),
         ),
       ],
     );
+  }
+
+  Future<void> _pickImage() async {
+    try {
+      final pickedFiles = await _picker.pickMultiImage();
+      if (pickedFiles != null) {
+        if (kIsWeb) {
+          final bytesList = await Future.wait(pickedFiles.map((file) => file.readAsBytes()));
+          setState(() {
+            _imageBytesList = bytesList;
+            _imageFileNames = pickedFiles.map((file) => file.name).toList();
+          });
+        } else {
+          setState(() {
+            _imageFiles = pickedFiles.map((file) => File(file.path)).toList();
+            _imageFileNames = pickedFiles.map((file) => file.path.split('/').last).toList();
+          });
+        }
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al seleccionar la imagen: $e')),
+      );
+    }
+  }
+
+  Future<void> _pickVideo() async {
+    try {
+      final pickedFile = await _picker.pickVideo(source: ImageSource.gallery);
+      if (pickedFile != null) {
+        if (kIsWeb) {
+          final bytes = await pickedFile.readAsBytes();
+          setState(() {
+            _videoBytesList.add(bytes);
+            _videoFileNames.add(pickedFile.name);
+          });
+        } else {
+          setState(() {
+            _videoFiles.add(File(pickedFile.path));
+            _videoFileNames.add(pickedFile.path.split('/').last);
+          });
+        }
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al seleccionar el video: $e')),
+      );
+    }
   }
 
   Widget _buildTextField(TextEditingController controller, String labelText,
@@ -199,18 +262,18 @@ class _CrearTareaState extends State<CrearTarea> {
           itemBuilder: (context, index) {
             return ListTile(
               title: Text('${index + 1}. ${_pasos[index]['texto']}'),
-              subtitle: _pasos[index]['mediaFiles'].isNotEmpty || _pasos[index]['mediaBytesList'].isNotEmpty
+              subtitle: _pasos[index]['imageFiles'].isNotEmpty || _pasos[index]['imageBytesList'].isNotEmpty
                   ? SizedBox(
                       height: 50,
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
-                        itemCount: _pasos[index]['mediaFiles'].length,
+                        itemCount: _pasos[index]['imageFiles'].length,
                         itemBuilder: (context, mediaIndex) {
                           return Padding(
                             padding: const EdgeInsets.all(4.0),
                             child: kIsWeb
-                                ? Image.memory(_pasos[index]['mediaBytesList'][mediaIndex]!, width: 50, height: 50)
-                                : Image.file(_pasos[index]['mediaFiles'][mediaIndex]!, width: 50, height: 50),
+                                ? Image.memory(_pasos[index]['imageBytesList'][mediaIndex]!, width: 50, height: 50)
+                                : Image.file(_pasos[index]['imageFiles'][mediaIndex]!, width: 50, height: 50),
                           );
                         },
                       ),
@@ -227,25 +290,38 @@ class _CrearTareaState extends State<CrearTarea> {
     return ElevatedButton(
       onPressed: () async {
         if (_nuevoPasoController.text.isNotEmpty) {
-          List<String?> urlMediaList = [];
-          for (int i = 0; i < _mediaFiles.length; i++) {
-            String? urlMedia = _mediaFiles[i] != null || _mediaBytesList[i] != null
-                ? await _subirImagenPaso(_mediaFiles[i], _mediaBytesList[i], _pasos.length + 1, i)
+          List<String?> urlImageList = [];
+          List<String?> urlVideoList = [];
+          for (int i = 0; i < _imageFiles.length; i++) {
+            String? urlImage = _imageFiles[i] != null || _imageBytesList[i] != null
+                ? await _subirImagenPaso(_imageFiles[i], _imageBytesList[i], _pasos.length + 1, i)
                 : null;
-            urlMediaList.add(urlMedia);
+            urlImageList.add(urlImage);
+          }
+          for (int i = 0; i < _videoFiles.length; i++) {
+            String? urlVideo = _videoFiles[i] != null || _videoBytesList[i] != null
+                ? await _subirVideoPaso(_videoFiles[i], _videoBytesList[i], _pasos.length + 1, i)
+                : null;
+            urlVideoList.add(urlVideo);
           }
 
           setState(() {
             _pasos.add({
               'texto': _nuevoPasoController.text,
-              'mediaFiles': _mediaFiles,
-              'mediaBytesList': _mediaBytesList,
-              'urlMediaList': urlMediaList,
+              'imageFiles': _imageFiles,
+              'imageBytesList': _imageBytesList,
+              'urlImageList': urlImageList,
+              'videoFiles': _videoFiles,
+              'videoBytesList': _videoBytesList,
+              'urlVideoList': urlVideoList,
             });
             _nuevoPasoController.clear();
-            _mediaFiles = [];
-            _mediaBytesList = [];
-            _mediaFileNames = [];
+            _imageFiles = [];
+            _imageBytesList = [];
+            _imageFileNames = [];
+            _videoFiles = [];
+            _videoBytesList = [];
+            _videoFileNames = [];
           });
         }
       },
@@ -367,10 +443,10 @@ class _CrearTareaState extends State<CrearTarea> {
   }
 
   Future<String?> _subirImagenPaso(
-      File? mediaFile, Uint8List? mediaBytes, int pasoIndex, int mediaIndex) async {
-    if (mediaFile != null || mediaBytes != null) {
+      File? imageFile, Uint8List? imageBytes, int pasoIndex, int mediaIndex) async {
+    if (imageFile != null || imageBytes != null) {
       try {
-        String nombreArchivo = _mediaFileNames[mediaIndex] ?? '';
+        String nombreArchivo = _imageFileNames[mediaIndex] ?? '';
         if (RegExp(r'^\d+$').hasMatch(nombreArchivo)) {
           return null;
         }
@@ -378,16 +454,44 @@ class _CrearTareaState extends State<CrearTarea> {
         String nombreFinal = '$pasoIndex-$mediaIndex $nombreArchivo';
         String ruta = 'tareas/${_tituloController.text}';
 
-        if (kIsWeb && mediaBytes != null) {
-          return await _imagenController.subirImagenWebPaso(
-              mediaBytes, ruta, nombreFinal);
-        } else if (mediaFile != null) {
-          return await _imagenController.subirImagenPaso(
-              mediaFile, ruta, nombreFinal);
+        if (kIsWeb && imageBytes != null) {
+          return await _imagenController.subirImagenWeb(
+              imageBytes, ruta, nombreFinal);
+        } else if (imageFile != null) {
+          return await _imagenController.subirImagen(
+              imageFile, ruta, nombreFinal);
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error al subir la imagen: $e')),
+        );
+      }
+    }
+    return null;
+  }
+
+  Future<String?> _subirVideoPaso(
+      File? videoFile, Uint8List? videoBytes, int pasoIndex, int mediaIndex) async {
+    if (videoFile != null || videoBytes != null) {
+      try {
+        String nombreArchivo = _videoFileNames[mediaIndex] ?? '';
+        if (RegExp(r'^\d+$').hasMatch(nombreArchivo)) {
+          return null;
+        }
+
+        String nombreFinal = '$pasoIndex-$mediaIndex $nombreArchivo';
+        String ruta = 'tareas/${_tituloController.text}';
+
+        if (kIsWeb && videoBytes != null) {
+          return await _imagenController.subirVideoWeb(
+              videoBytes, ruta, nombreFinal);
+        } else if (videoFile != null) {
+          return await _imagenController.subirVideo(
+              videoFile, ruta, nombreFinal);
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al subir el video: $e')),
         );
       }
     }
