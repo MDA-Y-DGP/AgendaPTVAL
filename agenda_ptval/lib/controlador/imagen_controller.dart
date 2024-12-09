@@ -52,6 +52,28 @@ class ImagenController {
     }
   }
 
+  Future<String> subirVideo(File video, String ruta, String nombre) async {
+    try {
+      final storageRef = FirebaseStorage.instance.ref().child('$ruta/$nombre');
+      final uploadTask = storageRef.putFile(video);
+      final snapshot = await uploadTask.whenComplete(() => null);
+      return await snapshot.ref.getDownloadURL();
+    } catch (e) {
+      throw Exception('Error al subir el video: $e');
+    }
+  }
+
+  Future<String> subirVideoWeb(Uint8List videoBytes, String ruta, String nombre) async {
+    try {
+      final storageRef = FirebaseStorage.instance.ref().child('$ruta/$nombre');
+      final uploadTask = storageRef.putData(videoBytes);
+      final snapshot = await uploadTask.whenComplete(() => null);
+      return await snapshot.ref.getDownloadURL();
+    } catch (e) {
+      throw Exception('Error al subir el video: $e');
+    }
+  }
+
   Future<String> obtenerFotoPerfil(String nickname) async {
     try {
       final storageRef =
