@@ -126,9 +126,15 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.primary,
-        title: Text(
-          widget.title,
-          style: TextStyle(fontSize: 28.sp), // Usar .sp para el tamaño de texto
+        title: Padding(
+          padding: EdgeInsets.only(top: 40.0.h), // Aumentar el padding superior para bajar más el título
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              widget.title,
+              style: TextStyle(fontSize: 28.sp), // Usar .sp para el tamaño de texto
+            ),
+          ),
         ),
         centerTitle: true,
       ),
