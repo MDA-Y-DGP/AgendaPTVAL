@@ -86,73 +86,44 @@ class _PaginaPrincipalEstudianteState extends State<PaginaPrincipalEstudiante> {
     );
   }
 
-  Widget _buildDayView() {
-    return ListView.builder(
-      itemCount: _tareasDelDia.length,
-      itemBuilder: (context, index) {
-        Tarea tarea = _tareasDelDia[index];
-        return Row(
-          mainAxisAlignment:
-              MainAxisAlignment.center, // Centra los elementos en el Row
-          children: [
-            GestureDetector(
-              onTap: () {
-                if (tarea.tipo == 'comedor') {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => RealizarComanda(),
-                    ),
-                  );
-                }
-              },
-              child: Container(
-                width: 200,
-                height: 200,
-                margin:
-                    EdgeInsets.only(bottom: 10), // Espacio entre los elementos
-                decoration: BoxDecoration(
-                  color: Colors.blue,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: ColorFiltered(
-                  colorFilter: ColorFilter.mode(
-                    _tareasCompletadas[tarea.idTarea]!
-                        ? Colors.grey
-                        : Colors.transparent,
-                    BlendMode.saturation,
+Widget _buildDayView() {
+  // Definir el tamaño fijo de cada cuadrado
+  double squareSize = 200.0; // Tamaño deseado (ajústalo según tu preferencia)
+
+  return Padding(
+    padding: const EdgeInsets.all(10.0), // Márgenes alrededor del GridView
+    child: Center(
+      child: Wrap(
+        spacing: 10.0, // Espacio horizontal entre elementos
+        runSpacing: 10.0, // Espacio vertical entre elementos
+        children: _tareasDelDia.map((tarea) {
+          return GestureDetector(
+            onTap: () {
+              if (tarea.tipo == 'comedor') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => RealizarComanda(),
                   ),
-                  child: _getPictogramaTarea(tarea),
-                ),
+                );
+              }
+            },
+            child: Container(
+              width: squareSize, // Ancho fijo
+              height: squareSize, // Altura fija (cuadrado)
+              decoration: BoxDecoration(
+                color: Colors.blue,
+                borderRadius: BorderRadius.circular(8), // Bordes redondeados
               ),
+              child: _getPictogramaTarea(tarea),
             ),
-            SizedBox(width: 10), // Espacio entre los contenedores
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  _tareasCompletadas[tarea.idTarea] =
-                      !_tareasCompletadas[tarea.idTarea]!;
-                });
-              },
-              child: Container(
-                width: 100,
-                height: 100,
-                margin: EdgeInsets.only(bottom: 10), // Asegura el mismo margen
-                decoration: BoxDecoration(
-                  color: Colors.orange,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Image.asset(
-                  'assets/pictograma_completado.png',
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
+          );
+        }).toList(),
+      ),
+    ),
+  );
+}
+
 
   Widget _getPictogramaTarea(Tarea tarea) {
     switch (tarea.tipo) {
