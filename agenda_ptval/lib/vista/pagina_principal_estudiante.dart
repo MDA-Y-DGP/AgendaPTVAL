@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../modelo/tarea_modelo.dart'; // Importa el modelo de Tarea
 import '../controlador/tarea_controller.dart'; // Importa la función obtenerTareasAsignadasPorFecha
-import 'inicio_sesion_estudiante.dart';
 import 'realizar_comanda.dart'; // Importa la vista realizar_comanda.dart
 
 class PaginaPrincipalEstudiante extends StatefulWidget {

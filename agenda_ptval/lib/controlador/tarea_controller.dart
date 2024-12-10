@@ -360,4 +360,14 @@ class TareaController {
       throw Exception('Error al borrar la tarea: $e');
     }
   }
+
+    // Método para obtener una tarea específica por su ID
+  Future<Tarea?> obtenerTareaPorId(int idTarea) async {
+    QuerySnapshot querySnapshot =
+        await _tareasCollection.where('idTarea', isEqualTo: idTarea).get();
+    if (querySnapshot.docs.isNotEmpty) {
+      return Tarea.fromMap(querySnapshot.docs.first.data() as Map<String, dynamic>);
+    }
+    return null; // Retorna null si no se encuentra la tarea
+  }
 }
