@@ -186,11 +186,11 @@ class _RealizarComandaState extends State<RealizarComanda> {
     );
   }
 
-  Widget _buildNotes(String clase) {
+    Widget _buildNotes(String clase) {
     if (_controller.notas[clase] == null || _controller.notas[clase]!.isEmpty) {
       return SizedBox.shrink();
     }
-
+  
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -200,43 +200,43 @@ class _RealizarComandaState extends State<RealizarComanda> {
             border: OutlineInputBorder(),
           ),
           child: Container(
-            height: 140, // Altura fija
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: _controller.notas[clase]!.map((nota) {
-                  int index = _controller.notas[clase]!.indexOf(nota) + 1;
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4.0),
-                        child: RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: 'Nota $index: ',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                ),
+            height: 70, // Ajusta la altura según sea necesario
+            child: ListView.builder(
+              shrinkWrap: true,
+              physics: AlwaysScrollableScrollPhysics(), // Permitir desplazamiento
+              itemCount: _controller.notas[clase]!.length,
+              itemBuilder: (context, index) {
+                String nota = _controller.notas[clase]![index];
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4.0),
+                      child: RichText(
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'Nota ${index + 1}: ',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
                               ),
-                              TextSpan(
-                                text: nota,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.normal,
-                                  color: Colors.black,
-                                ),
+                            ),
+                            TextSpan(
+                              text: nota,
+                              style: TextStyle(
+                                fontWeight: FontWeight.normal,
+                                color: Colors.black,
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
-                      Divider(),
-                    ],
-                  );
-                }).toList(),
-              ),
+                    ),
+                    Divider(),
+                  ],
+                );
+              },
             ),
           ),
         ),

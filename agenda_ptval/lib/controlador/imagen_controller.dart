@@ -96,4 +96,18 @@ class ImagenController {
       throw Exception('Error al obtener la imagen: $e');
     }
   }
+
+  Future<String> obtenerFotoMenu(String nombre) async {
+    try {
+      final storageRef =
+          FirebaseStorage.instance.ref().child('img_menu/$nombre.jpg');
+      return await storageRef.getDownloadURL();
+    } catch (e) {
+      // Si no se encuentra la foto de perfil, devolver la URL de la imagen por defecto
+      final defaultRef =
+          FirebaseStorage.instance.ref().child('img_menu/foto_menu.png');
+      return await defaultRef.getDownloadURL();
+    }
+  }
 }
+
