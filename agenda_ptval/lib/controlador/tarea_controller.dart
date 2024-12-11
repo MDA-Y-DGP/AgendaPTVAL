@@ -361,7 +361,7 @@ class TareaController {
     }
   }
 
-    // Método para obtener una tarea específica por su ID
+  // Método para obtener una tarea específica por su ID
   Future<Tarea?> obtenerTareaPorId(int idTarea) async {
     QuerySnapshot querySnapshot =
         await _tareasCollection.where('idTarea', isEqualTo: idTarea).get();
@@ -370,4 +370,29 @@ class TareaController {
     }
     return null; // Retorna null si no se encuentra la tarea
   }
+
+  // Obtener el texto del paso específico
+  String obtenerTextoDePaso(Tarea tarea, int numeroDePaso) {
+    if (numeroDePaso < 0 || numeroDePaso >= (tarea.pasos?.length ?? 0)) {
+      return 'Paso no disponible'; // Manejo de error si el paso no existe
+    }
+    return tarea.pasos?[numeroDePaso] ?? ''; // Devuelve el texto del paso
+  }
+
+  // Obtener las imágenes del paso específico
+  List<String?> obtenerImagenesDePaso(Tarea tarea, int numeroDePaso) {
+    if (numeroDePaso < 0 || numeroDePaso >= (tarea.imageUrls?.length ?? 0)) {
+      return []; // Manejo de error si las imágenes no están disponibles
+    }
+    return tarea.imageUrls?[numeroDePaso] ?? [];
+  }
+
+  // Obtener los videos del paso específico
+  List<String?> obtenerVideosDePaso(Tarea tarea, int numeroDePaso) {
+    if (numeroDePaso < 0 || numeroDePaso >= (tarea.videoUrls?.length ?? 0)) {
+      return []; // Manejo de error si los videos no están disponibles
+    }
+    return tarea.videoUrls?[numeroDePaso] ?? [];
+  }
+
 }
