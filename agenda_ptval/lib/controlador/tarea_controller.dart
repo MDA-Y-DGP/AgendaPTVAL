@@ -370,8 +370,6 @@ class TareaController {
     }
     return null; // Retorna null si no se encuentra la tarea
   }
-<<<<<<< HEAD
-=======
 
   // Obtener el texto del paso específico
   String obtenerTextoDePaso(Tarea tarea, int numeroDePaso) {
@@ -416,5 +414,4 @@ class TareaController {
     }
   }
 
->>>>>>> ec8bc6b1d833ec8274ec9daa8ad7ef19684f06ea
 }
