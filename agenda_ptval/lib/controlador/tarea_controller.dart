@@ -395,4 +395,12 @@ class TareaController {
     return tarea.videoUrls?[numeroDePaso] ?? [];
   }
 
+  // Obtener media del paso específico
+  List<String?> obtenerMediaDePaso(Tarea tarea, int numeroDePaso) {
+    if (numeroDePaso < 0 || numeroDePaso >= (tarea.mediaUrls?.length ?? 0)) {
+      return []; // Manejo de error si los videos no están disponibles
+    }
+    return tarea.mediaUrls?[numeroDePaso] ?? [];
+  }
+
 }
