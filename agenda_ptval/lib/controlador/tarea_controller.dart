@@ -120,44 +120,48 @@ class TareaController {
     }
   }
 
-  Future<void> completarTarea(String idTarea, String nicknameEstudiante) async {
-    // Buscar al estudiante por su nickname en la colección estudiantes
-    QuerySnapshot estudianteSnapshot = await _estudiantesCollection
-        .where('nickname', isEqualTo: nicknameEstudiante)
-        .get();
+  Future<void> completarTarea(String nickname, int idTarea) async {
+    try {
+      // Buscar al estudiante por su nickname
+      QuerySnapshot estudianteSnapshot = await _estudiantesCollection
+          .where('nickname', isEqualTo: nickname)
+          .get();
 
-    if (estudianteSnapshot.docs.isEmpty) {
-      throw Exception('Estudiante no encontrado');
+      if (estudianteSnapshot.docs.isEmpty) {
+        throw Exception('Estudiante no encontrado');
+      }
+
+      // Obtener el ID del documento del estudiante
+      DocumentSnapshot estudianteDoc = estudianteSnapshot.docs.first;
+      String estudianteId = estudianteDoc.id;
+
+      // Referencia a la subcolección de tareas del estudiante
+      CollectionReference tareasRef = _estudiantesCollection
+          .doc(estudianteId)
+          .collection('tareasAsignadas');
+
+      // Buscar la tarea por su ID en Firestore
+      QuerySnapshot tareaSnapshot = await tareasRef
+          .where('idTarea', isEqualTo: idTarea)
+          .get();
+
+      // Verificar si la tarea existe
+      if (tareaSnapshot.docs.isEmpty) {
+        throw Exception('Tarea con idTarea $idTarea no encontrada en las asignaciones de este estudiante');
+      }
+
+      // Obtener el documento de la tarea
+      DocumentSnapshot tareaDoc = tareaSnapshot.docs.first;
+
+      // Actualizar el campo completado a true
+      await tareaDoc.reference.update({'completado': true});
+      print('Tarea marcada como completada');
+    } catch (e) {
+      print('Error al marcar la tarea como completada: $e');
+      throw Exception('Error al marcar la tarea como completada: $e');
     }
-
-    // Obtener el ID del documento del estudiante
-    DocumentSnapshot estudianteDoc = estudianteSnapshot.docs.first;
-    String estudianteId = estudianteDoc.id;
-
-    // Referencia a la subcolección de tareas del estudiante
-    CollectionReference tareasRef = _estudiantesCollection
-        .doc(estudianteId)
-        .collection('tareasAsignadas');
-
-    // Buscar la tarea por su ID en Firestore
-    DocumentSnapshot tareaDoc = await tareasRef.doc(idTarea.toString()).get();
-
-    // Verificar si la tarea existe
-    if (!tareaDoc.exists) {
-      throw Exception('Tarea con idTarea $idTarea no encontrada en las asignaciones de este estudiante');
-    }
-
-    // Obtener el estado actual de la tarea
-    bool completadaActual = tareaDoc['completado'] ?? false; // Si no está definida, asumimos que está incompleta
-
-    // Alternar el estado de completada (de true a false o de false a true)
-    bool nuevoEstado = !completadaActual;
-
-    // Actualizar el estado de la tarea en Firestore
-    await tareaDoc.reference.update({
-      'completado': nuevoEstado, // Alternamos el estado de la tarea
-    });
   }
+
 
   Future<void> evaluarTarea(
       String idTarea, String evaluacion, String nicknameEstudiante) async {
@@ -413,5 +417,45 @@ class TareaController {
       throw Exception('Error al modificar la tarea: $e');
     }
   }
-
+    Future<List<Map<String, dynamic>>> obtenerPasos(int idTarea) async {
+      try {
+        // Obtener la colección de tareas donde idTarea es igual al idTarea proporcionado
+        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+            .collection('tareas')
+            .where('idTarea', isEqualTo: idTarea)
+            .get();
+  
+        List<Map<String, dynamic>> pasos = [];
+        // Verificar si se encontraron documentos en la colección de tareas
+        if (querySnapshot.docs.isNotEmpty) {
+          for (var doc in querySnapshot.docs) {
+            // Verificar si el documento no es null y contiene el campo lista de pasos
+            var data = doc.data() as Map<String, dynamic>?;
+            if (data != null && data.containsKey('pasos')) {
+              List<dynamic> pasosList = data['pasos'];
+              for (var paso in pasosList) {
+                if (paso is Map<String, dynamic>) {
+                  pasos.add(paso);
+                } else if (paso is String) {
+                  // Manejar el caso en que el paso es un String
+                  pasos.add({'descripcion': paso});
+                } else {
+                  print('El paso no es del tipo esperado: $paso');
+                }
+              }
+            } else {
+              print('El documento no contiene el campo "pasos" o es null');
+            }
+          }
+        } else {
+          print('No se encontraron tareas con idTarea: $idTarea');
+        }
+  
+        print('Pasos obtenidos: $pasos'); // Agrega este print para depurar
+        return pasos;
+      } catch (e) {
+        print('Error al obtener los pasos: $e'); // Agrega este print para depurar
+        throw Exception('Error al obtener los pasos: $e');
+      }
+    }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../modelo/tarea_modelo.dart'; // Importa el modelo de Tarea
 import '../controlador/tarea_controller.dart'; // Importa la función obtenerTareasAsignadasPorFecha
 import 'realizar_comanda.dart'; // Importa la vista realizar_comanda.dart
+import 'realizar_tarea_pasos.dart';
 
 class PaginaPrincipalEstudiante extends StatefulWidget {
   final String nickname;
@@ -86,44 +87,54 @@ class _PaginaPrincipalEstudianteState extends State<PaginaPrincipalEstudiante> {
     );
   }
 
-Widget _buildDayView() {
-  // Definir el tamaño fijo de cada cuadrado
-  double squareSize = 200.0; // Tamaño deseado (ajústalo según tu preferencia)
-
-  return Padding(
-    padding: const EdgeInsets.all(10.0), // Márgenes alrededor del GridView
-    child: Center(
-      child: Wrap(
-        spacing: 10.0, // Espacio horizontal entre elementos
-        runSpacing: 10.0, // Espacio vertical entre elementos
-        children: _tareasDelDia.map((tarea) {
-          return GestureDetector(
-            onTap: () {
-              if (tarea.tipo == 'comedor') {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => RealizarComanda(),
-                  ),
-                );
-              }
-            },
-            child: Container(
-              width: squareSize, // Ancho fijo
-              height: squareSize, // Altura fija (cuadrado)
-              decoration: BoxDecoration(
-                color: Colors.blue,
-                borderRadius: BorderRadius.circular(8), // Bordes redondeados
-              ),
-              child: _getPictogramaTarea(tarea),
+  Widget _buildDayView() {
+    return Wrap(
+      spacing: 10, // Espacio horizontal entre los elementos
+      runSpacing: 10, // Espacio vertical entre las filas
+      alignment: WrapAlignment.center, // Centra los elementos en el Wrap
+      children: _tareasDelDia.map((tarea) {
+        return GestureDetector(
+          onTap: () {
+            if (tarea.tipo == 'comedor') {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => RealizarComanda(),
+                ),
+              );
+            } else if (tarea.tipo == 'por pasos') {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => RealizarTareaPorPasos(idTarea: tarea.idTarea, nickname: widget.nickname),
+                ),
+              );
+            }
+          },
+          child: Container(
+            width: 200,
+            height: 200,
+            decoration: BoxDecoration(
+              color: Colors.blue,
+              borderRadius: BorderRadius.circular(8),
             ),
-          );
-        }).toList(),
-      ),
-    ),
-  );
-}
-
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: ColorFiltered(
+                colorFilter: ColorFilter.mode(
+                  _tareasCompletadas[tarea.idTarea]!
+                      ? Colors.grey
+                      : Colors.transparent,
+                  BlendMode.saturation,
+                ),
+                child: _getPictogramaTarea(tarea),
+              ),
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
 
   Widget _getPictogramaTarea(Tarea tarea) {
     switch (tarea.tipo) {
