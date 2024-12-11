@@ -347,17 +347,25 @@ class _CrearTareaState extends State<CrearTarea> {
         if (_formKey.currentState!.validate()) {
           if (_tipo == 'por pasos') {
             if (_perfilFile != null || _perfilBytes != null) {
-              //String? urlPerfil = await _subirImagenPaso(_perfilFile, _perfilBytes, 0);
+              String? urlPerfil = await _subirImagenPaso(_perfilFile, _perfilBytes, 0, 0);
               // Guardar la URL de la imagen de perfil en la tarea
             }
 
             for (var i = 0; i < _pasos.length; i++) {
               var paso = _pasos[i];
-              if (paso['urlMedia'] == null &&
-                  (paso['mediaFile'] != null || paso['mediaBytes'] != null)) {
-                String? urlMedia = await _subirImagenPaso(
-                    paso['mediaFile'], paso['mediaBytes'], i + 1, i); // Added missing argument
-                paso['urlMedia'] = urlMedia;
+              for (int j = 0; j < paso['imageFiles'].length; j++) {
+                if (paso['urlImageList'][j] == null) {
+                  String? urlImage = await _subirImagenPaso(
+                      paso['imageFiles'][j], paso['imageBytesList'][j], i + 1, j);
+                  paso['urlImageList'][j] = urlImage;
+                }
+              }
+              for (int j = 0; j < paso['videoFiles'].length; j++) {
+                if (paso['urlVideoList'][j] == null) {
+                  String? urlVideo = await _subirVideoPaso(
+                      paso['videoFiles'][j], paso['videoBytesList'][j], i + 1, j);
+                  paso['urlVideoList'][j] = urlVideo;
+                }
               }
             }
           }
@@ -446,7 +454,9 @@ class _CrearTareaState extends State<CrearTarea> {
       File? imageFile, Uint8List? imageBytes, int pasoIndex, int mediaIndex) async {
     if (imageFile != null || imageBytes != null) {
       try {
-        String nombreArchivo = _imageFileNames[mediaIndex] ?? '';
+        String nombreArchivo = _imageFileNames.isNotEmpty && mediaIndex < _imageFileNames.length
+            ? _imageFileNames[mediaIndex] ?? ''
+            : '';
         if (RegExp(r'^\d+$').hasMatch(nombreArchivo)) {
           return null;
         }
@@ -474,7 +484,9 @@ class _CrearTareaState extends State<CrearTarea> {
       File? videoFile, Uint8List? videoBytes, int pasoIndex, int mediaIndex) async {
     if (videoFile != null || videoBytes != null) {
       try {
-        String nombreArchivo = _videoFileNames[mediaIndex] ?? '';
+        String nombreArchivo = _videoFileNames.isNotEmpty && mediaIndex < _videoFileNames.length
+            ? _videoFileNames[mediaIndex] ?? ''
+            : '';
         if (RegExp(r'^\d+$').hasMatch(nombreArchivo)) {
           return null;
         }
