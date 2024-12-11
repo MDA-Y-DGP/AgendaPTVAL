@@ -31,7 +31,7 @@ class ImagenController {
   Future<String> subirImagenPaso(
       File imagen, String ruta, String nombre) async {
     try {
-      final storageRef = FirebaseStorage.instance.ref().child('$ruta/$nombre.jpg');
+      final storageRef = FirebaseStorage.instance.ref().child('$ruta/$nombre');
       final uploadTask = storageRef.putFile(imagen);
       final snapshot = await uploadTask.whenComplete(() => null);
       return await snapshot.ref.getDownloadURL();
@@ -43,7 +43,7 @@ class ImagenController {
   Future<String> subirImagenWebPaso(
       Uint8List imagenBytes, String ruta, String nombre) async {
     try {
-      final storageRef = FirebaseStorage.instance.ref().child('$ruta/$nombre.jpg');
+      final storageRef = FirebaseStorage.instance.ref().child('$ruta/$nombre');
       final uploadTask = storageRef.putData(imagenBytes);
       final snapshot = await uploadTask.whenComplete(() => null);
       return await snapshot.ref.getDownloadURL();
@@ -66,28 +66,6 @@ class ImagenController {
   Future<String> subirVideoWeb(Uint8List videoBytes, String ruta, String nombre) async {
     try {
       final storageRef = FirebaseStorage.instance.ref().child('$ruta/$nombre');
-      final uploadTask = storageRef.putData(videoBytes);
-      final snapshot = await uploadTask.whenComplete(() => null);
-      return await snapshot.ref.getDownloadURL();
-    } catch (e) {
-      throw Exception('Error al subir el video: $e');
-    }
-  }
-
-  Future<String> subirVideoPaso(File video, String ruta, String nombre) async {
-    try {
-      final storageRef = FirebaseStorage.instance.ref().child('$ruta/$nombre.mp4');
-      final uploadTask = storageRef.putFile(video);
-      final snapshot = await uploadTask.whenComplete(() => null);
-      return await snapshot.ref.getDownloadURL();
-    } catch (e) {
-      throw Exception('Error al subir el video: $e');
-    }
-  }
-
-  Future<String> subirVideoWebPaso(Uint8List videoBytes, String ruta, String nombre) async {
-    try {
-      final storageRef = FirebaseStorage.instance.ref().child('$ruta/$nombre.mp4');
       final uploadTask = storageRef.putData(videoBytes);
       final snapshot = await uploadTask.whenComplete(() => null);
       return await snapshot.ref.getDownloadURL();
