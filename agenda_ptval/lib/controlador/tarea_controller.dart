@@ -370,4 +370,51 @@ class TareaController {
     }
     return null; // Retorna null si no se encuentra la tarea
   }
+<<<<<<< HEAD
+=======
+
+  // Obtener el texto del paso específico
+  String obtenerTextoDePaso(Tarea tarea, int numeroDePaso) {
+    if (numeroDePaso < 0 || numeroDePaso >= (tarea.pasos?.length ?? 0)) {
+      return 'Paso no disponible'; // Manejo de error si el paso no existe
+    }
+    return tarea.pasos?[numeroDePaso] ?? ''; // Devuelve el texto del paso
+  }
+
+  // Obtener las imágenes del paso específico
+  List<String?> obtenerImagenesDePaso(Tarea tarea, int numeroDePaso) {
+    if (numeroDePaso < 0 || numeroDePaso >= (tarea.imageUrls?.length ?? 0)) {
+      return []; // Manejo de error si las imágenes no están disponibles
+    }
+    return tarea.imageUrls?[numeroDePaso] ?? [];
+  }
+
+  // Obtener los videos del paso específico
+  List<String?> obtenerVideosDePaso(Tarea tarea, int numeroDePaso) {
+    if (numeroDePaso < 0 || numeroDePaso >= (tarea.videoUrls?.length ?? 0)) {
+      return []; // Manejo de error si los videos no están disponibles
+    }
+    return tarea.videoUrls?[numeroDePaso] ?? [];
+  }
+
+  // Obtener media del paso específico
+  List<String?> obtenerMediaDePaso(Tarea tarea, int numeroDePaso) {
+    if (numeroDePaso < 0 || numeroDePaso >= (tarea.mediaUrls?.length ?? 0)) {
+      return []; // Manejo de error si los videos no están disponibles
+    }
+    return tarea.mediaUrls?[numeroDePaso] ?? [];
+  }
+
+  Future<void> modificarTarea(Tarea tarea) async {
+    try {
+      QuerySnapshot tareaSnapshot = await _tareasCollection.where('idTarea', isEqualTo: tarea.idTarea).get();
+      if (tareaSnapshot.docs.isNotEmpty) {
+        await tareaSnapshot.docs.first.reference.update(tarea.toMap());
+      }
+    } catch (e) {
+      throw Exception('Error al modificar la tarea: $e');
+    }
+  }
+
+>>>>>>> ec8bc6b1d833ec8274ec9daa8ad7ef19684f06ea
 }
