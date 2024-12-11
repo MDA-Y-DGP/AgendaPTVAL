@@ -101,6 +101,8 @@ class ImagenController {
     try {
       final storageRef =
           FirebaseStorage.instance.ref().child('img_menu/$nombre.jpg');
+      
+      print('URL de la imagen: ${await storageRef.getDownloadURL()}');
       return await storageRef.getDownloadURL();
     } catch (e) {
       // Si no se encuentra la foto de perfil, devolver la URL de la imagen por defecto

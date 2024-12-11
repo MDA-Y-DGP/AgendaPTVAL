@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../controlador/comanda_controller.dart';
+import '../controlador/imagen_controller.dart';
 
 class RealizarComanda extends StatefulWidget {
   @override
@@ -8,6 +9,7 @@ class RealizarComanda extends StatefulWidget {
 
 class _RealizarComandaState extends State<RealizarComanda> {
   final ComandaController _controller = ComandaController();
+  final ImagenController _imageController = ImagenController();
 
   @override
   void initState() {
@@ -131,60 +133,142 @@ class _RealizarComandaState extends State<RealizarComanda> {
     );
   }
 
-  Widget _buildMenuItems(String clase) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        InputDecorator(
-          decoration: InputDecoration(
-            labelText: 'Lista de menús',
-            border: OutlineInputBorder(),
-            contentPadding: EdgeInsets.all(8.0),
-          ),
-          child: Column(
-            children: _controller.tiposMenu.map((tipoMenu) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 5.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Widget _buildMenuItems(String clase) {
+          PageController _pageController = PageController();
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              InputDecorator(
+                decoration: InputDecoration(
+                  labelText: 'Lista de menús',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.all(8.0),
+                ),
+                child: Column(
                   children: [
-                    Text(
-                      tipoMenu,
-                      style: TextStyle(fontWeight: FontWeight.normal),
-                    ),
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         IconButton(
-                          icon: Icon(Icons.remove, size: 30),
+                          icon: Icon(Icons.arrow_left, size: 30),
                           onPressed: () {
-                            setState(() {
-                              _controller.decrementarCantidad(clase, tipoMenu);
-                            });
+                            _pageController.previousPage(
+                              duration: Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                            );
                           },
                         ),
-                        Text(
-                          _controller.comandas[clase]![tipoMenu].toString(),
-                          style: TextStyle(fontSize: 20),
+                        Expanded(
+                          child: SizedBox(
+                            height: 200, // Adjust height as needed
+                            child: PageView.builder(
+                              controller: _pageController,
+                              itemCount: _controller.tiposMenu.length,
+                              itemBuilder: (context, index) {
+                                String tipoMenu = _controller.tiposMenu[index];
+                                return FutureBuilder<String>(
+                                  future: _imageController.obtenerFotoMenu(tipoMenu),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState == ConnectionState.waiting) {
+                                      return Center(child: CircularProgressIndicator());
+                                    } else if (snapshot.hasError || !snapshot.hasData) {
+                                      return Column(
+                                        children: [
+                                          SizedBox(height: 100), // Empty space when no image
+                                          Text(
+                                            tipoMenu,
+                                            style: TextStyle(fontWeight: FontWeight.normal),
+                                          ),
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              IconButton(
+                                                icon: Icon(Icons.remove, size: 30),
+                                                onPressed: () {
+                                                  setState(() {
+                                                    _controller.decrementarCantidad(clase, tipoMenu);
+                                                  });
+                                                },
+                                              ),
+                                              Text(
+                                                _controller.comandas[clase]![tipoMenu].toString(),
+                                                style: TextStyle(fontSize: 20),
+                                              ),
+                                              IconButton(
+                                                icon: Icon(Icons.add, size: 30),
+                                                onPressed: () {
+                                                  setState(() {
+                                                    _controller.incrementarCantidad(clase, tipoMenu);
+                                                  });
+                                                },
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      );
+                                    } else {
+                                      return Column(
+                                        children: [
+                                          Image.network(
+                                            snapshot.data!,
+                                            height: 100,
+                                            fit: BoxFit.cover,
+                                          ),
+                                          Text(
+                                            tipoMenu,
+                                            style: TextStyle(fontWeight: FontWeight.normal),
+                                          ),
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              IconButton(
+                                                icon: Icon(Icons.remove, size: 30),
+                                                onPressed: () {
+                                                  setState(() {
+                                                    _controller.decrementarCantidad(clase, tipoMenu);
+                                                  });
+                                                },
+                                              ),
+                                              Text(
+                                                _controller.comandas[clase]![tipoMenu].toString(),
+                                                style: TextStyle(fontSize: 20),
+                                              ),
+                                              IconButton(
+                                                icon: Icon(Icons.add, size: 30),
+                                                onPressed: () {
+                                                  setState(() {
+                                                    _controller.incrementarCantidad(clase, tipoMenu);
+                                                  });
+                                                },
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      );
+                                    }
+                                  },
+                                );
+                              },
+                            ),
+                          ),
                         ),
                         IconButton(
-                          icon: Icon(Icons.add, size: 30),
+                          icon: Icon(Icons.arrow_right, size: 30),
                           onPressed: () {
-                            setState(() {
-                              _controller.incrementarCantidad(clase, tipoMenu);
-                            });
+                            _pageController.nextPage(
+                              duration: Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                            );
                           },
                         ),
                       ],
                     ),
                   ],
                 ),
-              );
-            }).toList(),
-          ),
-        ),
-      ],
-    );
-  }
+              ),
+            ],
+          );
+        }
 
     Widget _buildNotes(String clase) {
     if (_controller.notas[clase] == null || _controller.notas[clase]!.isEmpty) {
