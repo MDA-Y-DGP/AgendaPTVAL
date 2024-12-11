@@ -4,6 +4,7 @@ import 'package:agenda_ptval/vista/asignar_tarea.dart';
 import 'package:agenda_ptval/vista/evaluar_tarea.dart'; // Importa la nueva página de Evaluar Tarea
 import 'package:agenda_ptval/controlador/tarea_controller.dart';
 import 'package:agenda_ptval/modelo/tarea_modelo.dart';
+import 'package:agenda_ptval/vista/modificar_tarea.dart'; // Import the modify task page
 
 class TareasPage extends StatefulWidget {
   @override
@@ -90,6 +91,15 @@ class _TareasPageState extends State<TareasPage> {
       context,
       MaterialPageRoute(
         builder: (context) => EvaluarTarea(),
+      ),
+    ).then((_) => _cargarTareas());
+  }
+
+  void _navegarModificarTarea(Tarea tarea) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ModificarTarea(tarea: tarea),
       ),
     ).then((_) => _cargarTareas());
   }
@@ -191,9 +201,18 @@ class _TareasPageState extends State<TareasPage> {
                                 color: Theme.of(context).colorScheme.onSurface, // Color del texto
                               ),
                             ),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red),
-                              onPressed: () => _borrarTarea(tarea),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.edit, color: Colors.blue),
+                                  onPressed: () => _navegarModificarTarea(tarea),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete, color: Colors.red),
+                                  onPressed: () => _borrarTarea(tarea),
+                                ),
+                              ],
                             ),
                           ),
                         );

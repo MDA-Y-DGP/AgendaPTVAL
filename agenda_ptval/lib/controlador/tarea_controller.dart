@@ -403,4 +403,15 @@ class TareaController {
     return tarea.mediaUrls?[numeroDePaso] ?? [];
   }
 
+  Future<void> modificarTarea(Tarea tarea) async {
+    try {
+      QuerySnapshot tareaSnapshot = await _tareasCollection.where('idTarea', isEqualTo: tarea.idTarea).get();
+      if (tareaSnapshot.docs.isNotEmpty) {
+        await tareaSnapshot.docs.first.reference.update(tarea.toMap());
+      }
+    } catch (e) {
+      throw Exception('Error al modificar la tarea: $e');
+    }
+  }
+
 }
