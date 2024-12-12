@@ -1,8 +1,7 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import '../controlador/tarea_controller.dart'; // Asegúrate de importar tu controlador
+import '../controlador/imagen_controller.dart'; // Importa el controlador de imagen
 
 class RealizarTareaPorPasos extends StatefulWidget {
   final int idTarea;
@@ -18,9 +17,9 @@ class _RealizarTareaPorPasosState extends State<RealizarTareaPorPasos> {
   List<Map<String, dynamic>> _pasos = [];
   String _tituloTarea = '';
   bool _isLoading = true; // Variable para controlar el estado de carga
-  final ImagePicker _picker = ImagePicker();
   final PageController _pageController = PageController();
   final TareaController _controller = TareaController(); // Instancia de tu controlador
+  final ImagenController _imagenController = ImagenController(); // Instancia del controlador de imagen
 
   @override
   void initState() {
@@ -63,24 +62,6 @@ class _RealizarTareaPorPasosState extends State<RealizarTareaPorPasos> {
       });
       // Manejar el error, por ejemplo, mostrando un mensaje
       print('Error al cargar los pasos: $e');
-    }
-  }
-
-  Future<void> _pickImage(int index) async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _pasos[index]['imagen'] = pickedFile.path;
-      });
-    }
-  }
-
-  Future<void> _pickVideo(int index) async {
-    final pickedFile = await _picker.pickVideo(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _pasos[index]['video'] = pickedFile.path;
-      });
     }
   }
 
@@ -142,8 +123,6 @@ class _RealizarTareaPorPasosState extends State<RealizarTareaPorPasos> {
                           } else {
                             var paso = _pasos[index];
                             var descripcion = paso['descripcion'] ?? 'Descripción no disponible';
-                            var imagen = paso['imagen'];
-                            var video = paso['video'];
 
                             return Padding(
                               padding: const EdgeInsets.all(16.0),
@@ -151,28 +130,35 @@ class _RealizarTareaPorPasosState extends State<RealizarTareaPorPasos> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    descripcion,
-                                    style: TextStyle(fontSize: 24),
+                                    'Paso ${index + 1}',
+                                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                                     textAlign: TextAlign.center,
                                   ),
                                   const SizedBox(height: 16),
-                                  if (imagen != null)
-                                    Image.file(
-                                      File(imagen),
-                                      height: 200,
-                                    ),
-                                  const SizedBox(height: 16),
-                                  ElevatedButton(
-                                    onPressed: () => _pickImage(index),
-                                    child: Text('Subir Imagen'),
+                                  FutureBuilder<String>(
+                                    future: _imagenController.obtenerImagenPaso(widget.idTarea, index + 1),
+                                    builder: (context, snapshot) {
+                                      print('Llamando a obtenerImagenPaso para el paso ${index + 1}');
+                                      if (snapshot.connectionState == ConnectionState.waiting) {
+                                        return CircularProgressIndicator();
+                                      } else if (snapshot.hasError) {
+                                        print('Error al obtener la imagen del paso ${index + 1}: ${snapshot.error}');
+                                        return SizedBox(height: 200); // Espacio vacío si hay un error
+                                      } else {
+                                        print('Imagen del paso ${index + 1} obtenida: ${snapshot.data}');
+                                        return Image.network(
+                                          snapshot.data!,
+                                          height: 200,
+                                          fit: BoxFit.cover,
+                                        );
+                                      }
+                                    },
                                   ),
                                   const SizedBox(height: 16),
-                                  if (video != null)
-                                    Text('Video seleccionado: ${video.split('/').last}'),
-                                  const SizedBox(height: 16),
-                                  ElevatedButton(
-                                    onPressed: () => _pickVideo(index),
-                                    child: Text('Subir Video'),
+                                  Text(
+                                    descripcion,
+                                    style: TextStyle(fontSize: 24),
+                                    textAlign: TextAlign.center,
                                   ),
                                 ],
                               ),

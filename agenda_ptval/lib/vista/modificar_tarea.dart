@@ -103,9 +103,6 @@ class _ModificarTareaState extends State<ModificarTarea> {
             descripcion: _descripcionController.text,
             tipo: _tipo,
             pasos: widget.tarea.pasos,
-            mediaUrls: widget.tarea.mediaUrls,
-            imageUrls: widget.tarea.imageUrls,
-            videoUrls: widget.tarea.videoUrls,
           );
 
           await _tareaController.modificarTarea(tareaModificada);
