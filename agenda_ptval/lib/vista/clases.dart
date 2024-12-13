@@ -134,6 +134,7 @@ class _ClasesPageState extends State<ClasesPage> {
     );
   }
 
+  //
   void _borrarClase(Clase clase) async {
     try {
       await _controller.borrarClase(clase.idClase);
