@@ -7,7 +7,8 @@ import 'clases.dart';
 import 'crear_menus.dart';
 import 'pedir_materiales.dart';
 import 'listas_inventario.dart';
-import 'tareas.dart'; 
+import 'tareas.dart';
+import 'notificaciones.dart';
 
 class PantallaInicio extends StatefulWidget {
   final Profesor profesor;
@@ -265,10 +266,25 @@ class _PantallaInicioState extends State<PantallaInicio> {
                   MaterialPageRoute(builder: (context) => PedirMateriales()),
                 ),
               );
+            case 7:
+              return _buildOption(
+                context: context,
+                label: 'Notificaciones',
+                icon: Icons.notifications,
+                color: Colors.orange, // Puedes elegir un color que te guste
+                onTap: () {
+                  // Aquí iría la lógica para abrir la pantalla de notificaciones
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => NotificacionesPage()),
+                  );
+                },
+              );
             default:
               return Container();
           }
-        } else {
+        }
+        else {
           return _buildOption(
             context: context,
             label: 'Pedir Materiales',

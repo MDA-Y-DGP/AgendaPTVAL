@@ -86,6 +86,7 @@ class _PedirMaterialesState extends State<PedirMateriales> {
         idClase: _selectedClase!,
         fecha: DateTime.now(),
         materiales: materialesPedidos,
+        visto: false,
       );
 
       try {

@@ -5,11 +5,13 @@ class PedidoMateriales {
   final String idClase;
   final DateTime fecha;
   final List<Inventario> materiales;
+  final bool visto;
 
   PedidoMateriales({
     required this.idClase,
     required this.fecha,
     required this.materiales,
+    required this.visto,
   });
 
   Map<String, dynamic> toMap() {
@@ -17,6 +19,7 @@ class PedidoMateriales {
       'id_clase': idClase,
       'fecha': Timestamp.fromDate(DateTime(fecha.year, fecha.month, fecha.day)),
       'materiales': materiales.map((material) => material.toMap()).toList(),
+      'visto': visto,
     };
   }
 
@@ -27,6 +30,7 @@ class PedidoMateriales {
       materiales: List<Inventario>.from(
         map['materiales']?.map((x) => Inventario.fromMap(x)),
       ),
+      visto: map['visto'],
     );
   }
 }
