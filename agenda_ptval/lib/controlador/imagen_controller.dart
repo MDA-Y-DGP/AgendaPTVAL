@@ -102,7 +102,7 @@ class ImagenController {
   Future<String> obtenerFotoMenu(String nombre) async {
     try {
       final storageRef =
-          FirebaseStorage.instance.ref().child('img_menu/$nombre.png');
+          FirebaseStorage.instance.ref().child('img_menu/$nombre.jpg');
       
       print('URL de la imagen: ${await storageRef.getDownloadURL()}');
       return await storageRef.getDownloadURL();
