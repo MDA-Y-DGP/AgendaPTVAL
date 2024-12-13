@@ -95,6 +95,7 @@ flutter:
     - assets/pictograma_miercoles.png
     - assets/pictograma_jueves.png
     - assets/pictograma_viernes.png
+    - assets/pictograma_notas.png
 
 scripts:
   web: flutter run -d chrome --web-renderer html
