@@ -5,10 +5,9 @@ import 'package:intl/date_symbol_data_local.dart'; // Importar para inicializar 
 
 class ComandaController {
   final Map<String, Map<String, int>> comandas = {};
-  final Map<String, List<String>> notas = {};
+  String? nota;
   List<String> clases = [];
   List<String> tiposMenu = [];
-  String notaActual = '';
   final PageController pageController = PageController();
   int paginaActual = 0;
   final TextEditingController notaController = TextEditingController();
@@ -25,7 +24,6 @@ class ComandaController {
         for (var tipoMenu in tiposMenu) {
           comandas[clase]![tipoMenu] = 0;
         }
-        notas[clase] = [];
       }
       print('Clases obtenidas: $clases'); // Depuración
       callback(); // Notificar a la interfaz de usuario
@@ -63,12 +61,8 @@ class ComandaController {
     }
   }
 
-  void agregarNota(String clase) {
-    if (notaActual.isNotEmpty) {
-      notas[clase]!.add(notaActual);
-      notaActual = '';
-      notaController.clear();
-    }
+  void agregarNota(String nuevaNota) {
+    nota = nuevaNota;
   }
 
   Future<void> confirmarComanda() async {
@@ -81,17 +75,17 @@ class ComandaController {
 
       Map<String, dynamic> comandaData = {
         'fecha': formattedDate,
+        'nota': nota,
         'clases': comandas.map((clase, menus) {
           return MapEntry(clase, {
             'menus': menus,
-            'notas': notas[clase],
           });
         }),
       };
 
       await FirebaseFirestore.instance.collection('comandas').add(comandaData);
       print('Comanda confirmada: $comandas');
-      print('Notas: $notas');
+      print('Nota: $nota');
     } catch (e) {
       print('Error al confirmar comanda: $e');
     }

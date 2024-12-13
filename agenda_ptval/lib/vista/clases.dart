@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:agenda_ptval/vista/agregar_clase.dart';
 import 'package:agenda_ptval/controlador/clase_controller.dart';
+import 'package:agenda_ptval/controlador/imagen_controller.dart';
 import 'package:agenda_ptval/modelo/clase_modelo.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart'; // Importar foundation.dart para kIsWeb
 
 class ClasesPage extends StatefulWidget {
   @override
@@ -10,7 +15,11 @@ class ClasesPage extends StatefulWidget {
 
 class _ClasesPageState extends State<ClasesPage> {
   final ClaseController _controller = ClaseController();
+  final ImagenController _imagenController = ImagenController();
+  final ImagePicker _picker = ImagePicker();
   List<Clase> clases = [];
+  File? nuevaImagen;
+  Uint8List? nuevaImagenBytes;
 
   @override
   void initState() {
@@ -31,17 +40,57 @@ class _ClasesPageState extends State<ClasesPage> {
     }
   }
 
+  Future<String?> _obtenerImagenClase(String nombreClase) async {
+    try {
+      return await _imagenController.obtenerImagenClase(nombreClase);
+    } catch (e) {
+      print('Error al obtener la imagen de la clase: $e');
+      return null;
+    }
+  }
+
+  Future<void> _pickImage() async {
+    final XFile? pickedImage = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedImage != null) {
+      if (kIsWeb) {
+        nuevaImagenBytes = await pickedImage.readAsBytes();
+      } else {
+        nuevaImagen = File(pickedImage.path);
+      }
+      setState(() {});
+    }
+  }
+
   void _editarClase(Clase clase) async {
     TextEditingController _nombreController =
         TextEditingController(text: clase.nombre);
 
+    String? imagenActualUrl = await _obtenerImagenClase(clase.nombre);
+
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Editar Nombre de la Clase'),
-        content: TextField(
-          controller: _nombreController,
-          decoration: const InputDecoration(labelText: 'Nuevo nombre'),
+        title: const Text('Editar Clase'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _nombreController,
+              decoration: const InputDecoration(labelText: 'Nuevo nombre'),
+            ),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: _pickImage,
+              child: Text('Seleccionar Nueva Imagen'),
+            ),
+            const SizedBox(height: 10),
+            if (nuevaImagen != null && !kIsWeb)
+              Image.file(nuevaImagen!, height: 150),
+            if (nuevaImagenBytes != null && kIsWeb)
+              Image.memory(nuevaImagenBytes!, height: 150),
+            if (nuevaImagen == null && nuevaImagenBytes == null && imagenActualUrl != null)
+              Image.network(imagenActualUrl, height: 150),
+          ],
         ),
         actions: [
           TextButton(
@@ -51,12 +100,27 @@ class _ClasesPageState extends State<ClasesPage> {
           ElevatedButton(
             onPressed: () async {
               try {
-                await _controller.actualizarClase(clase.idClase, _nombreController.text);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Clase actualizada con éxito!')),
-                );
-                Navigator.pop(context);
-                _cargarClases();
+                String nuevoNombre = _nombreController.text;
+                if (nuevoNombre.isNotEmpty) {
+                  await _controller.actualizarClase(clase.idClase, nuevoNombre);
+                  if (nuevaImagen != null || nuevaImagenBytes != null) {
+                    try {
+                      await _imagenController.borrarImagen('img_clase/${clase.nombre}.jpg');
+                    } catch (e) {
+                      print('No se pudo borrar la imagen anterior: $e');
+                    }
+                    if (kIsWeb && nuevaImagenBytes != null) {
+                      await _imagenController.subirImagenWeb(nuevaImagenBytes!, 'img_clase', nuevoNombre);
+                    } else if (nuevaImagen != null) {
+                      await _imagenController.subirImagen(nuevaImagen!, 'img_clase', nuevoNombre);
+                    }
+                  }
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Clase actualizada con éxito!')),
+                  );
+                  Navigator.pop(context);
+                  _cargarClases();
+                }
               } catch (e) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Error al actualizar la clase: $e')),
@@ -71,110 +135,86 @@ class _ClasesPageState extends State<ClasesPage> {
   }
 
   void _borrarClase(Clase clase) async {
-    bool? confirmar = await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Confirmar Borrado'),
-        content: Text('¿Estás seguro de que deseas borrar la clase "${clase.nombre}"?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Borrar'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmar == true) {
-      try {
-        await _controller.borrarClase(clase.idClase);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Clase borrada con éxito!')),
-        );
-        _cargarClases();
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al borrar la clase: $e')),
-        );
-      }
+    try {
+      await _controller.borrarClase(clase.idClase);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Clase borrada con éxito')),
+      );
+      _cargarClases();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al borrar la clase: $e')),
+      );
     }
-  }
-
-  void _navegarAgregarClase() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => AgregarClase(),
-      ),
-    ).then((_) => _cargarClases());
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Gestión de Clases'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        title: Text('Clases'),
+        centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            ElevatedButton(
-              onPressed: _navegarAgregarClase,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                textStyle: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white, // Color del texto
-                ),
-              ),
-              child: const Text('Agregar Clase', style: TextStyle(color: Colors.white)),
-            ),
-            const SizedBox(height: 20),
-            Expanded(
-              child: ListView.builder(
+        child: clases.isEmpty
+            ? Center(child: CircularProgressIndicator())
+            : ListView.builder(
                 itemCount: clases.length,
                 itemBuilder: (context, index) {
                   final clase = clases[index];
-                  return Card(
-                    color: Theme.of(context).colorScheme.surface, // Fondo de la tarjeta
-                    child: ListTile(
-                      title: Text(
-                        clase.nombre,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface, // Color del texto
+                  return FutureBuilder<String?>(
+                    future: _obtenerImagenClase(clase.nombre),
+                    builder: (context, snapshot) {
+                      return Card(
+                        child: ListTile(
+                          contentPadding: EdgeInsets.all(10),
+                          title: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (snapshot.connectionState == ConnectionState.waiting)
+                                Center(child: CircularProgressIndicator())
+                              else if (snapshot.hasError || !snapshot.hasData)
+                                SizedBox(height: 150) // Espacio vacío si hay un error o no hay imagen
+                              else
+                                Image.network(snapshot.data!, height: 150, fit: BoxFit.cover),
+                              SizedBox(height: 10),
+                              Text(
+                                clase.nombre,
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.onSurface, // Color del texto
+                                ),
+                              ),
+                            ],
+                          ),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.edit, color: Colors.blue),
+                                onPressed: () => _editarClase(clase),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete, color: Colors.red),
+                                onPressed: () => _borrarClase(clase),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit, color: Colors.blue),
-                            onPressed: () => _editarClase(clase),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () => _borrarClase(clase),
-                          ),
-                        ],
-                      ),
-                    ),
+                      );
+                    },
                   );
                 },
               ),
-            ),
-          ],
-        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => AgregarClase()),
+          ).then((_) => _cargarClases());
+        },
+        child: Icon(Icons.add),
       ),
     );
   }

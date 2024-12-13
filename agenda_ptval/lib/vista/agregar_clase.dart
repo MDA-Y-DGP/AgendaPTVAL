@@ -1,6 +1,12 @@
+import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:agenda_ptval/controlador/clase_controller.dart';
-import 'package:agenda_ptval/modelo/clase_modelo.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
+import '../controlador/imagen_controller.dart';
+import '../controlador/clase_controller.dart';
+import '../modelo/clase_modelo.dart';
 
 class AgregarClase extends StatefulWidget {
   @override
@@ -10,12 +16,46 @@ class AgregarClase extends StatefulWidget {
 class _AgregarClaseState extends State<AgregarClase> {
   final _formKey = GlobalKey<FormState>();
   final ClaseController _controller = ClaseController();
+  final ImagenController _imagenController = ImagenController();
+  final ImagePicker _picker = ImagePicker();
 
   String nombreClase = '';
+  File? imagen;
+  Uint8List? imagenBytes;
 
-  void _agregarClase() {
+  Future<void> _subirImagen() async {
+    if (imagen != null || imagenBytes != null) {
+      try {
+        if (kIsWeb && imagenBytes != null) {
+          await _imagenController.subirImagenWeb(imagenBytes!, 'img_clase', nombreClase);
+        } else if (imagen != null) {
+          await _imagenController.subirImagen(imagen!, 'img_clase', nombreClase);
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al subir la imagen: $e')),
+        );
+        return;
+      }
+    }
+  }
+
+  Future<void> _pickImage() async {
+    final XFile? pickedImage = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedImage != null) {
+      if (kIsWeb) {
+        imagenBytes = await pickedImage.readAsBytes();
+      } else {
+        imagen = File(pickedImage.path);
+      }
+      setState(() {});
+    }
+  }
+
+  Future<void> _agregarClase() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
+      await _subirImagen();
       Clase nuevaClase = Clase(
         idClase: 0, // Este valor se actualizará en el controlador
         nombre: nombreClase,
@@ -72,6 +112,16 @@ class _AgregarClaseState extends State<AgregarClase> {
                   nombreClase = value!;
                 },
               ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _pickImage,
+                child: Text('Seleccionar Imagen'),
+              ),
+              const SizedBox(height: 20),
+              if (imagen != null && !kIsWeb)
+                Image.file(imagen!, height: 150),
+              if (imagenBytes != null && kIsWeb)
+                Image.memory(imagenBytes!, height: 150),
               const SizedBox(height: 20),
               Center(
                 child: ElevatedButton(

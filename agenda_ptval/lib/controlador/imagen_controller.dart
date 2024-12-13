@@ -154,5 +154,24 @@ class ImagenController {
       return await defaultRef.getDownloadURL();
     }
   }
+
+  Future<String> obtenerImagenClase(String nombreClase) async {
+    try {
+      final ref = FirebaseStorage.instance.ref().child('img_clase/$nombreClase.jpg');
+      final url = await ref.getDownloadURL();
+      return url;
+    } catch (e) {
+      throw Exception('Error al obtener la imagen de la clase: $e');
+    }
+  }
+
+  Future<void> borrarImagen(String rutaImagen) async {
+    try {
+      final ref = FirebaseStorage.instance.ref().child(rutaImagen);
+      await ref.delete();
+    } catch (e) {
+      throw Exception('Error al borrar la imagen: $e');
+    }
+  }
 }
 
