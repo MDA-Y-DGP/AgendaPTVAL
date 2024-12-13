@@ -30,6 +30,7 @@ class TareaController {
       descripcion: tarea.descripcion,
       tipo: tarea.tipo,
       pasos: tarea.pasos,
+      materiales: tarea.materiales,
 
     );
 
@@ -110,6 +111,7 @@ class TareaController {
         'descripcion': tarea.descripcion,
         'tipo': tarea.tipo,
         'pasos': tarea.pasos,
+        'materiales': tarea.materiales,
         'evaluacion': tarea.evaluacion,
         'completado': false, // Añadir el campo completado con valor false
       });

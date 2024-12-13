@@ -20,18 +20,13 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
       fecha: DateTime(2024, 11, 25, 14, 30),
       idClase: "2",
       profesor: "Profesor 1",
-      materiales: [
-        {"nombre": "Pizarra", "cantidad": 1, "id_objeto": 101},
-        {"nombre": "Marcadores", "cantidad": 5, "id_objeto": 102},
-      ],
+      materiales: {'Gomas': 1, 'Lapices': 3}
     ),
     Notificacion(
       fecha: DateTime(2024, 11, 20, 10, 0),
       idClase: "1",
       profesor: "Profesor 2",
-      materiales: [
-        {"nombre": "Cuadernos", "cantidad": 10, "id_objeto": 103},
-      ],
+      materiales: {'Gomas': 1, 'Lacpices': 3, 'Cartulinas': 2}
     ),
   ];
 
@@ -51,8 +46,9 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
     Tarea nuevaTarea = Tarea(
       idTarea: 0,
       titulo: 'Pedir materiales clase ${notificacion.idClase}',
-      descripcion: 'Materiales pedidos: ${notificacion.materiales.map((m) => m['nombre']).join(', ')}',
+      descripcion: 'Materiales pedidos para la clase: ${notificacion.idClase}',
       tipo: 'inventario',
+      materiales: notificacion.materiales,
     );
 
     // Llamar al controlador de tareas para crear la tarea
@@ -78,8 +74,8 @@ class _NotificacionesPageState extends State<NotificacionesPage> {
               Text('Profesor: ${notificacion.profesor}'),
               const SizedBox(height: 10),
               Text('Materiales pedidos:'),
-              ...notificacion.materiales.map((material) {
-                return Text('- ${material['nombre']} (x${material['cantidad']})');
+              ...notificacion.materiales.entries.map((entry) {
+                return Text('- ID: ${entry.key} (x${entry.value})');
               }).toList(),
             ],
           ),
