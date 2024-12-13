@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import '../modelo/tarea_modelo.dart'; // Importa el modelo de Tarea
-import '../controlador/tarea_controller.dart'; // Importa la función obtenerTareasAsignadasPorFecha
-import 'realizar_comanda.dart'; // Importa la vista realizar_comanda.dart
+import 'package:agenda_ptval/controlador/tarea_controller.dart';
+import 'package:agenda_ptval/modelo/tarea_modelo.dart';
+import 'package:agenda_ptval/widgets/imagen_con_texto.dart'; // Importa el nuevo widget
+import 'realizar_comanda.dart';
 import 'realizar_tarea_pasos.dart';
 
 class PaginaPrincipalEstudiante extends StatefulWidget {
@@ -127,7 +128,10 @@ class _PaginaPrincipalEstudianteState extends State<PaginaPrincipalEstudiante> {
                       : Colors.transparent,
                   BlendMode.saturation,
                 ),
-                child: _getPictogramaTarea(tarea),
+                child: ImagenConTexto(
+                  imageUrl: _getPictogramaTarea(tarea),
+                  texto: tarea.titulo,
+                ),
               ),
             ),
           ),
@@ -136,31 +140,16 @@ class _PaginaPrincipalEstudianteState extends State<PaginaPrincipalEstudiante> {
     );
   }
 
-  Widget _getPictogramaTarea(Tarea tarea) {
+  String _getPictogramaTarea(Tarea tarea) {
     switch (tarea.tipo) {
       case 'comedor':
-        return Image.asset(
-          'assets/pictograma_comedor.png',
-          fit: BoxFit.cover,
-        );
+        return 'assets/pictograma_comedor.png';
       case 'inventario':
-        return Image.asset(
-          'assets/pictograma_inventario.png',
-          fit: BoxFit.cover,
-        );
+        return 'assets/pictograma_inventario.png';
       case 'por pasos':
-        return Image.asset(
-          'assets/pictograma_pasos.png',
-          fit: BoxFit.cover,
-        );
+        return 'assets/pictograma_pasos.png';
       default:
-        return Center(
-          child: Text(
-            tarea.titulo,
-            style: TextStyle(color: Colors.white),
-            textAlign: TextAlign.center,
-          ),
-        );
+        return 'assets/default.png';
     }
   }
 
