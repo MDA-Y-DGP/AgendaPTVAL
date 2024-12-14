@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:agenda_ptval/controlador/tarea_controller.dart';
 import 'package:agenda_ptval/modelo/tarea_modelo.dart';
 import 'package:agenda_ptval/widgets/imagen_con_texto.dart'; // Importa el nuevo widget
-import 'realizar_comanda.dart';
 import 'realizar_tarea_pasos.dart';
+import 'seleccionar_clase.dart';
 
 class PaginaPrincipalEstudiante extends StatefulWidget {
   final String nickname;
@@ -100,7 +100,7 @@ class _PaginaPrincipalEstudianteState extends State<PaginaPrincipalEstudiante> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => RealizarComanda(),
+                  builder: (context) => SeleccionarClasePage(),
                 ),
               );
             } else if (tarea.tipo == 'por pasos') {
