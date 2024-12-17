@@ -1,10 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:agenda_ptval/modelo/paso_modelo.dart';
 
+/// Controlador para manejar las operaciones relacionadas con los pasos.
 class PasoController {
+  /// Colección de pasos en Firestore.
   final CollectionReference _pasosCollection =
       FirebaseFirestore.instance.collection('pasos');
 
+  /// Método para crear un nuevo paso.
+  /// 
+  /// [paso] es la instancia de [Paso] que se va a crear.
+  /// Asigna un nuevo ID al paso y lo guarda en la base de datos.
   Future<void> crearPaso(Paso paso) async {
     // Obtener todos los pasos para encontrar el mayor ID
     QuerySnapshot querySnapshot = await _pasosCollection.get();

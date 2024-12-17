@@ -3,15 +3,32 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart'; // Importar para inicializar la configuración regional
 
+/// Controlador para manejar las operaciones relacionadas con las comandas.
 class ComandaController {
+  /// Mapa para almacenar las comandas por clase y tipo de menú.
   final Map<String, Map<String, int>> comandas = {};
+
+  /// Nota adicional para la comanda.
   String? nota;
+
+  /// Lista de nombres de clases.
   List<String> clases = [];
+
+  /// Lista de tipos de menú.
   List<String> tiposMenu = [];
+
+  /// Controlador de página para la navegación entre páginas.
   final PageController pageController = PageController();
+
+  /// Índice de la página actual.
   int paginaActual = 0;
+
+  /// Controlador de texto para la nota.
   final TextEditingController notaController = TextEditingController();
 
+  /// Método para obtener las clases desde Firestore.
+  /// 
+  /// [callback] es una función que se llama después de obtener las clases.
   Future<void> obtenerClases(Function callback) async {
     try {
       QuerySnapshot snapshot =
@@ -32,6 +49,9 @@ class ComandaController {
     }
   }
 
+  /// Método para obtener los menús desde Firestore.
+  /// 
+  /// [callback] es una función que se llama después de obtener los menús.
   Future<void> obtenerMenus(Function callback) async {
     try {
       QuerySnapshot snapshot =
@@ -51,20 +71,32 @@ class ComandaController {
     }
   }
 
+  /// Método para incrementar la cantidad de un tipo de menú para una clase.
+  /// 
+  /// [clase] es el nombre de la clase.
+  /// [tipoMenu] es el tipo de menú cuya cantidad se incrementará.
   void incrementarCantidad(String clase, String tipoMenu) {
     comandas[clase]![tipoMenu] = comandas[clase]![tipoMenu]! + 1;
   }
 
+  /// Método para decrementar la cantidad de un tipo de menú para una clase.
+  /// 
+  /// [clase] es el nombre de la clase.
+  /// [tipoMenu] es el tipo de menú cuya cantidad se decrementará.
   void decrementarCantidad(String clase, String tipoMenu) {
     if (comandas[clase]![tipoMenu]! > 0) {
       comandas[clase]![tipoMenu] = comandas[clase]![tipoMenu]! - 1;
     }
   }
 
+  /// Método para agregar una nota a la comanda.
+  /// 
+  /// [nuevaNota] es la nota que se agregará.
   void agregarNota(String nuevaNota) {
     nota = nuevaNota;
   }
 
+  /// Método para confirmar y guardar la comanda en Firestore.
   Future<void> confirmarComanda() async {
     try {
       await initializeDateFormatting(
@@ -91,6 +123,9 @@ class ComandaController {
     }
   }
 
+  /// Método para cambiar la página actual en el controlador de página.
+  /// 
+  /// [index] es el índice de la nueva página.
   void cambiarPagina(int index) {
     paginaActual = index;
     pageController.animateToPage(

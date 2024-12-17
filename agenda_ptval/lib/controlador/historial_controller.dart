@@ -1,13 +1,13 @@
-// historial_controller.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:agenda_ptval/modelo/historial_modelo.dart';
 
 /// Controlador para manejar las operaciones relacionadas con los historiales.
 class HistorialController {
-  /// Referencia a la colección de historiales en Firestore.
-  final CollectionReference _historialCollection = FirebaseFirestore.instance.collection('historiales');
+  /// Instancia de Firestore para acceder a la colección de historiales.
+  final CollectionReference _historialCollection =
+      FirebaseFirestore.instance.collection('historiales');
 
-  /// Método para obtener el mayor ID de los historiales.
+  /// Método para obtener el mayor ID de historial.
   /// 
   /// Devuelve el mayor ID encontrado entre los historiales.
   Future<int> obtenerMayorIdHistorial() async {

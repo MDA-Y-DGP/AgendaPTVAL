@@ -1,10 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+/// Modelo que representa una comanda.
 class Comanda {
+  /// ID de la clase.
   final String idClase;
+
+  /// Fecha de la comanda.
   final DateTime fecha;
+
+  /// Menús de la comanda.
   final Map<String, int> menus;
 
+  /// Constructor de la clase [Comanda].
   Comanda({
     required this.idClase,
     required this.fecha,
@@ -21,7 +28,7 @@ class Comanda {
   }
 
   /// Método para crear un objeto [Comanda] desde un mapa (JSON).
-  ///
+  /// 
   /// [json] es el mapa que contiene los datos de la comanda.
   /// Devuelve una instancia de [Comanda].
   factory Comanda.fromJson(Map<String, dynamic> json) {

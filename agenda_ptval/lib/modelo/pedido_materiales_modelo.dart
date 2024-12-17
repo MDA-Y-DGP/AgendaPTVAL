@@ -1,12 +1,20 @@
+import 'package:agenda_ptval/modelo/inventario_modelo.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'inventario_modelo.dart';
 
 class PedidoMateriales {
+  /// ID de la clase.
   final String idClase;
+
+  /// Fecha del pedido.
   final DateTime fecha;
+
+  /// Materiales del pedido.
   final List<Inventario> materiales;
+
+  /// Indica si el pedido ha sido visto.
   final bool visto;
 
+  /// Constructor de la clase [PedidoMateriales].
   PedidoMateriales({
     required this.idClase,
     required this.fecha,
@@ -14,6 +22,7 @@ class PedidoMateriales {
     required this.visto,
   });
 
+  /// Método para convertir una instancia de [PedidoMateriales] a un mapa.
   Map<String, dynamic> toMap() {
     return {
       'id_clase': idClase,
@@ -23,6 +32,7 @@ class PedidoMateriales {
     };
   }
 
+  /// Método para crear una instancia de [PedidoMateriales] a partir de un mapa.
   factory PedidoMateriales.fromMap(Map<String, dynamic> map) {
     return PedidoMateriales(
       idClase: map['id_clase'],

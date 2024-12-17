@@ -1,13 +1,20 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:agenda_ptval/modelo/tarea_modelo.dart';
 
+/// Controlador para manejar las operaciones relacionadas con las tareas.
 class TareaController {
+  /// Colección de tareas en Firestore.
   final CollectionReference _tareasCollection =
       FirebaseFirestore.instance.collection('tareas');
 
+  /// Colección de estudiantes en Firestore.
   final CollectionReference _estudiantesCollection =
       FirebaseFirestore.instance.collection('estudiantes');
 
+  /// Método para crear una nueva tarea.
+  /// 
+  /// [tarea] es la instancia de [Tarea] que se va a crear.
+  /// Asigna un nuevo ID a la tarea y la guarda en la base de datos.
   Future<int> crearTarea(Tarea tarea) async {
     // Obtener todas las tareas para encontrar el mayor ID
     QuerySnapshot querySnapshot = await _tareasCollection.get();
@@ -31,15 +38,17 @@ class TareaController {
       tipo: tarea.tipo,
       pasos: tarea.pasos,
       materiales: tarea.materiales,
-
     );
 
     // Guardar la nueva tarea en Firestore, dejando que Firebase asigne el ID del documento
     await _tareasCollection.add(nuevaTarea.toMap());
 
-    return newId; //Necesario para asignarle el ID a los pasos
+    return newId; // Necesario para asignarle el ID a los pasos
   }
 
+  /// Método para obtener todas las tareas.
+  /// 
+  /// Devuelve una lista de instancias de [Tarea].
   Future<List<Tarea>> obtenerTodasLasTareas() async {
     QuerySnapshot querySnapshot = await _tareasCollection.get();
     return querySnapshot.docs.map((doc) {
@@ -47,6 +56,9 @@ class TareaController {
     }).toList();
   }
 
+  /// Método para obtener las tareas de tipo "comedor".
+  /// 
+  /// Devuelve una lista de instancias de [Tarea] de tipo "comedor".
   Future<List<Tarea>> obtenerTareasDeTipoComedor() async {
     QuerySnapshot querySnapshot =
         await _tareasCollection.where('tipo', isEqualTo: 'comedor').get();
@@ -55,6 +67,9 @@ class TareaController {
     }).toList();
   }
 
+  /// Método para obtener las tareas de tipo "por pasos".
+  /// 
+  /// Devuelve una lista de instancias de [Tarea] de tipo "por pasos".
   Future<List<Tarea>> obtenerTareasDeTipoPorPasos() async {
     QuerySnapshot querySnapshot =
         await _tareasCollection.where('tipo', isEqualTo: 'por pasos').get();
@@ -63,6 +78,9 @@ class TareaController {
     }).toList();
   }
 
+  /// Método para obtener las tareas de tipo "inventario".
+  /// 
+  /// Devuelve una lista de instancias de [Tarea] de tipo "inventario".
   Future<List<Tarea>> obtenerTareasDeTipoInventario() async {
     QuerySnapshot querySnapshot =
         await _tareasCollection.where('tipo', isEqualTo: 'inventario').get();
@@ -71,6 +89,11 @@ class TareaController {
     }).toList();
   }
 
+  /// Método para asignar una tarea a un estudiante.
+  /// 
+  /// [selectedTarea] es el ID de la tarea seleccionada.
+  /// [nicknameEstudiante] es el nickname del estudiante.
+  /// [fecha] es la fecha de asignación de la tarea.
   Future<void> asignarTarea(
       String selectedTarea, String nicknameEstudiante, String fecha) async {
     try {
@@ -120,6 +143,10 @@ class TareaController {
     }
   }
 
+  /// Método para marcar una tarea como completada.
+  /// 
+  /// [nickname] es el nickname del estudiante.
+  /// [idTarea] es el ID de la tarea.
   Future<void> completarTarea(String nickname, int idTarea) async {
     try {
       // Buscar al estudiante por su nickname
@@ -162,7 +189,11 @@ class TareaController {
     }
   }
 
-
+  /// Método para evaluar una tarea.
+  /// 
+  /// [idTarea] es el ID de la tarea.
+  /// [evaluacion] es la evaluación de la tarea.
+  /// [nicknameEstudiante] es el nickname del estudiante.
   Future<void> evaluarTarea(
       String idTarea, String evaluacion, String nicknameEstudiante) async {
     // Buscar al estudiante por su nickname en la colección estudiantes
@@ -197,6 +228,10 @@ class TareaController {
     });
   }
 
+  /// Método para obtener las tareas asignadas a un estudiante.
+  /// 
+  /// [nicknameEstudiante] es el nickname del estudiante.
+  /// Devuelve una lista de instancias de [Tarea].
   Future<List<Tarea>> obtenerTareasAsignadas(String nicknameEstudiante) async {
     // Buscar al estudiante
     QuerySnapshot estudianteSnapshot = await _estudiantesCollection
@@ -230,6 +265,11 @@ class TareaController {
     return tareasAsignadas;
   }
 
+  /// Método para obtener las tareas asignadas a un estudiante por fecha.
+  /// 
+  /// [fecha] es la fecha de las tareas asignadas.
+  /// [nicknameEstudiante] es el nickname del estudiante.
+  /// Devuelve una lista de instancias de [Tarea].
   Future<List<Tarea>> obtenerTareasAsignadasPorFecha(String fecha, String nicknameEstudiante) async {
     // Buscar al estudiante
     QuerySnapshot estudianteSnapshot = await _estudiantesCollection
@@ -263,7 +303,10 @@ class TareaController {
     return tareasAsignadas;
   }
 
-
+  /// Método para obtener las tareas completadas por un estudiante.
+  /// 
+  /// [nicknameEstudiante] es el nickname del estudiante.
+  /// Devuelve una lista de instancias de [Tarea] completadas por el estudiante.
   Future<List<Tarea>> obtenerTareasCompletadas(String nicknameEstudiante) async {
     // Buscar al estudiante
     QuerySnapshot estudianteSnapshot = await _estudiantesCollection
@@ -299,6 +342,10 @@ class TareaController {
     return tareasAsignadas;
   }
 
+  /// Método para obtener las tareas completadas por un estudiante que aún no han sido evaluadas.
+  /// 
+  /// [nicknameEstudiante] es el nickname del estudiante.
+  /// Devuelve una lista de instancias de [Tarea] completadas por el estudiante que aún no han sido evaluadas.
   Future<List<Tarea>> obtenerTareasCompletadasSinEvaluar(String nicknameEstudiante) async {
     // Buscar al estudiante
     QuerySnapshot estudianteSnapshot = await _estudiantesCollection
@@ -335,6 +382,9 @@ class TareaController {
     return tareasAsignadas;
   }
 
+  /// Método para borrar una tarea.
+  /// 
+  /// [idTarea] es el ID de la tarea que se quiere borrar.
   Future<void> borrarTarea(int idTarea) async {
     try {
       // Borrar la tarea de la colección principal
@@ -365,7 +415,10 @@ class TareaController {
     }
   }
 
-    // Método para obtener una tarea específica por su ID
+  /// Método para obtener una tarea específica por su ID.
+  /// 
+  /// [idTarea] es el ID de la tarea.
+  /// Devuelve una instancia de [Tarea] si se encuentra, de lo contrario, devuelve null.
   Future<Tarea?> obtenerTareaPorId(int idTarea) async {
     QuerySnapshot querySnapshot =
         await _tareasCollection.where('idTarea', isEqualTo: idTarea).get();
@@ -375,7 +428,11 @@ class TareaController {
     return null; // Retorna null si no se encuentra la tarea
   }
 
-  // Obtener el texto del paso específico
+  /// Método para obtener el texto de un paso específico de una tarea.
+  /// 
+  /// [tarea] es la instancia de [Tarea].
+  /// [numeroDePaso] es el número del paso.
+  /// Devuelve el texto del paso.
   String obtenerTextoDePaso(Tarea tarea, int numeroDePaso) {
     if (numeroDePaso < 0 || numeroDePaso >= (tarea.pasos?.length ?? 0)) {
       return 'Paso no disponible'; // Manejo de error si el paso no existe
@@ -383,8 +440,9 @@ class TareaController {
     return tarea.pasos?[numeroDePaso] ?? ''; // Devuelve el texto del paso
   }
 
-
-
+  /// Método para modificar una tarea.
+  /// 
+  /// [tarea] es la instancia de [Tarea] que se va a modificar.
   Future<void> modificarTarea(Tarea tarea) async {
     try {
       QuerySnapshot tareaSnapshot = await _tareasCollection.where('idTarea', isEqualTo: tarea.idTarea).get();
@@ -395,45 +453,50 @@ class TareaController {
       throw Exception('Error al modificar la tarea: $e');
     }
   }
-    Future<List<Map<String, dynamic>>> obtenerPasos(int idTarea) async {
-      try {
-        // Obtener la colección de tareas donde idTarea es igual al idTarea proporcionado
-        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-            .collection('tareas')
-            .where('idTarea', isEqualTo: idTarea)
-            .get();
-  
-        List<Map<String, dynamic>> pasos = [];
-        // Verificar si se encontraron documentos en la colección de tareas
-        if (querySnapshot.docs.isNotEmpty) {
-          for (var doc in querySnapshot.docs) {
-            // Verificar si el documento no es null y contiene el campo lista de pasos
-            var data = doc.data() as Map<String, dynamic>?;
-            if (data != null && data.containsKey('pasos')) {
-              List<dynamic> pasosList = data['pasos'];
-              for (var paso in pasosList) {
-                if (paso is Map<String, dynamic>) {
-                  pasos.add(paso);
-                } else if (paso is String) {
-                  // Manejar el caso en que el paso es un String
-                  pasos.add({'descripcion': paso});
-                } else {
-                  print('El paso no es del tipo esperado: $paso');
-                }
+
+  /// Método para obtener los pasos de una tarea.
+  /// 
+  /// [idTarea] es el ID de la tarea.
+  /// Devuelve una lista de mapas con los pasos de la tarea.
+  Future<List<Map<String, dynamic>>> obtenerPasos(int idTarea) async {
+    try {
+      // Obtener la colección de tareas donde idTarea es igual al idTarea proporcionado
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('tareas')
+          .where('idTarea', isEqualTo: idTarea)
+          .get();
+
+      List<Map<String, dynamic>> pasos = [];
+      // Verificar si se encontraron documentos en la colección de tareas
+      if (querySnapshot.docs.isNotEmpty) {
+        for (var doc in querySnapshot.docs) {
+          // Verificar si el documento no es null y contiene el campo lista de pasos
+          var data = doc.data() as Map<String, dynamic>?;
+          if (data != null && data.containsKey('pasos')) {
+            List<dynamic> pasosList = data['pasos'];
+            for (var paso in pasosList) {
+              if (paso is Map<String, dynamic>) {
+                pasos.add(paso);
+              } else if (paso is String) {
+                // Manejar el caso en que el paso es un String
+                pasos.add({'descripcion': paso});
+              } else {
+                print('El paso no es del tipo esperado: $paso');
               }
-            } else {
-              print('El documento no contiene el campo "pasos" o es null');
             }
+          } else {
+            print('El documento no contiene el campo "pasos" o es null');
           }
-        } else {
-          print('No se encontraron tareas con idTarea: $idTarea');
         }
-  
-        print('Pasos obtenidos: $pasos'); // Agrega este print para depurar
-        return pasos;
-      } catch (e) {
-        print('Error al obtener los pasos: $e'); // Agrega este print para depurar
-        throw Exception('Error al obtener los pasos: $e');
+      } else {
+        print('No se encontraron tareas con idTarea: $idTarea');
       }
+
+      print('Pasos obtenidos: $pasos'); // Agrega este print para depurar
+      return pasos;
+    } catch (e) {
+      print('Error al obtener los pasos: $e'); // Agrega este print para depurar
+      throw Exception('Error al obtener los pasos: $e');
     }
+  }
 }

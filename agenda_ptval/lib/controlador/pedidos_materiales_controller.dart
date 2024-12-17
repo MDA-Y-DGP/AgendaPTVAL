@@ -2,12 +2,20 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:agenda_ptval/modelo/pedido_materiales_modelo.dart';
 import 'package:agenda_ptval/modelo/inventario_modelo.dart';
 
+/// Controlador para manejar las operaciones relacionadas con los pedidos de materiales.
 class PedidosMaterialesController {
+  /// Colección de pedidos en Firestore.
   final CollectionReference _pedidosCollection =
       FirebaseFirestore.instance.collection('pedidos');
+
+  /// Colección de inventario en Firestore.
   final CollectionReference _inventarioCollection =
       FirebaseFirestore.instance.collection('inventario');
 
+  /// Método para agregar un nuevo pedido de materiales.
+  /// 
+  /// [pedido] es la instancia de [PedidoMateriales] que se va a agregar.
+  /// Verifica si el pedido ya existe, actualiza la cantidad de materiales si es necesario y guarda el pedido en la base de datos.
   Future<void> agregarPedido(PedidoMateriales pedido) async {
     QuerySnapshot existingPedidoSnapshot = await _pedidosCollection
         .where('id_clase', isEqualTo: pedido.idClase)

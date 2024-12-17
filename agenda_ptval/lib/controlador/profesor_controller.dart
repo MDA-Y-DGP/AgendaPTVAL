@@ -3,10 +3,16 @@ import 'package:agenda_ptval/modelo/profesor_modelo.dart';
 import 'package:crypto/crypto.dart';
 import 'dart:convert';
 
+/// Controlador para manejar las operaciones relacionadas con los profesores.
 class ProfesorController {
+  /// Colección de profesores en Firestore.
   final CollectionReference _profesoresCollection =
       FirebaseFirestore.instance.collection('profesores');
 
+  /// Método para registrar un nuevo profesor.
+  /// 
+  /// [profesor] es la instancia de [Profesor] que se va a registrar.
+  /// Verifica si el nickname ya está en uso, asigna un nuevo ID al profesor y lo guarda en la base de datos.
   Future<void> registrarProfesor(Profesor profesor) async {
     QuerySnapshot existingNicknames = await _profesoresCollection
         .where('nickname', isEqualTo: profesor.nickname)
@@ -38,6 +44,10 @@ class ProfesorController {
     await _profesoresCollection.add(nuevoProfesor.toMap());
   }
 
+  /// Método para obtener un profesor por su ID.
+  /// 
+  /// [id] es el ID del profesor.
+  /// Devuelve una instancia de [Profesor] si se encuentra, de lo contrario, devuelve null.
   Future<Profesor?> obtenerProfesorPorId(String id) async {
     DocumentSnapshot doc = await _profesoresCollection.doc(id).get();
     if (doc.exists) {
@@ -46,6 +56,9 @@ class ProfesorController {
     return null;
   }
 
+  /// Método para obtener todos los profesores.
+  /// 
+  /// Devuelve una lista de instancias de [Profesor].
   Future<List<Profesor>> obtenerTodosLosProfesores() async {
     QuerySnapshot querySnapshot = await _profesoresCollection.get();
     return querySnapshot.docs
@@ -53,6 +66,11 @@ class ProfesorController {
         .toList();
   }
 
+  /// Método para verificar las credenciales de un profesor.
+  /// 
+  /// [nickname] es el nickname del profesor.
+  /// [contrasena] es la contraseña del profesor.
+  /// Devuelve una instancia de [Profesor] si las credenciales son correctas, de lo contrario, devuelve null.
   Future<Profesor?> verificarCredenciales(
       String nickname, String contrasena) async {
     final QuerySnapshot result = await _profesoresCollection
@@ -72,6 +90,10 @@ class ProfesorController {
     return null;
   }
 
+  /// Método para modificar la contraseña de un profesor.
+  /// 
+  /// [nickname] es el nickname del profesor.
+  /// [nuevaContrasena] es la nueva contraseña del profesor.
   Future<void> modificarContrasena(String nickname, String nuevaContrasena) async {
     String hashedPassword = _hashPassword(nuevaContrasena);
     QuerySnapshot querySnapshot = await _profesoresCollection
@@ -86,12 +108,9 @@ class ProfesorController {
     }
   }
 
-  String _hashPassword(String password) {
-    var bytes = utf8.encode(password);
-    var digest = sha256.convert(bytes);
-    return digest.toString();
-  }
-
+  /// Método para eliminar un profesor.
+  /// 
+  /// [id] es el ID del profesor que se quiere eliminar.
   Future<void> eliminarProfesor(String id) async {
     try {
       QuerySnapshot querySnapshot = await _profesoresCollection
@@ -104,5 +123,15 @@ class ProfesorController {
     } catch (e) {
       throw Exception('Error al eliminar profesor: $e');
     }
+  }
+
+  /// Método para hashear una contraseña.
+  /// 
+  /// [password] es la contraseña que se va a hashear.
+  /// Devuelve la contraseña hasheada.
+  String _hashPassword(String password) {
+    var bytes = utf8.encode(password);
+    var digest = sha256.convert(bytes);
+    return digest.toString();
   }
 }

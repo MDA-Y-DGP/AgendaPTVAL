@@ -3,12 +3,19 @@ import 'package:agenda_ptval/modelo/estudiante_modelo.dart';
 import 'package:agenda_ptval/controlador/historial_controller.dart';
 import 'package:agenda_ptval/modelo/historial_modelo.dart';
 
+/// Controlador para manejar las operaciones relacionadas con los estudiantes.
 class EstudianteController {
+  /// Instancia de Firestore para acceder a la base de datos.
   final CollectionReference _estudiantesCollection =
       FirebaseFirestore.instance.collection('estudiantes');
 
+  /// Instancia del controlador de historial.
   final HistorialController _historialController = HistorialController();
 
+  /// Método para registrar un nuevo estudiante.
+  /// 
+  /// [estudiante] es la instancia de [Estudiante] que se va a registrar.
+  /// Verifica si el nickname ya está en uso, asigna un nuevo ID al estudiante y lo guarda en la base de datos.
   Future<void> registrarEstudiante(Estudiante estudiante) async {
     QuerySnapshot existingNicknames = await _estudiantesCollection
         .where('nickname', isEqualTo: estudiante.nickname)
@@ -54,6 +61,11 @@ class EstudianteController {
     await _historialController.agregarHistorial(nuevoHistorial);
   }
 
+  /// Método para iniciar sesión de un estudiante.
+  /// 
+  /// [nickname] es el nickname del estudiante.
+  /// [contrasena] es la contraseña del estudiante.
+  /// Devuelve una instancia de [Estudiante] si las credenciales son correctas, de lo contrario, devuelve null.
   Future<Estudiante?> iniciarSesion(String nickname, String contrasena) async {
     try {
       QuerySnapshot query = await _estudiantesCollection
@@ -72,6 +84,9 @@ class EstudianteController {
     }
   }
 
+  /// Método para obtener los nombres y grados de aprendizaje de todos los estudiantes.
+  /// 
+  /// Devuelve una lista de mapas con los campos 'nickname' y 'gradoAprendizaje'.
   Future<List<Map<String, dynamic>>> obtenerNombreGradoDeEstudiantes() async {
     try {
       QuerySnapshot querySnapshot = await _estudiantesCollection.get();
@@ -93,6 +108,10 @@ class EstudianteController {
     }
   }
 
+  /// Método para obtener los estudiantes de una clase específica.
+  /// 
+  /// [claseId] es el identificador de la clase.
+  /// Devuelve una lista de instancias de [Estudiante].
   Future<List<Estudiante>> obtenerEstudiantesPorClase(String claseId) async {
     try {
       int claseIdInt = int.parse(claseId);
@@ -107,6 +126,10 @@ class EstudianteController {
     }
   }
 
+  /// Método para obtener el ID de un estudiante por su nickname.
+  /// 
+  /// [nickname] es el nickname del estudiante.
+  /// Devuelve el ID del estudiante como una cadena.
   Future<String?> obtenerIdPorNickname(String nickname) async {
     try {
       QuerySnapshot querySnapshot = await _estudiantesCollection
@@ -124,6 +147,10 @@ class EstudianteController {
     }
   }
 
+  /// Método para obtener las tareas de un estudiante por su nickname.
+  /// 
+  /// [nickname] es el nickname del estudiante.
+  /// Devuelve una lista de mapas con los campos 'nombre' y 'completada'.
   Future<List<Map<String, dynamic>>> obtenerTareasPorNickname(
       String nickname) async {
     try {
@@ -158,6 +185,9 @@ class EstudianteController {
     }
   }
 
+  /// Método para obtener todos los estudiantes.
+  /// 
+  /// Devuelve una lista de instancias de [Estudiante].
   Future<List<Estudiante>> obtenerTodosEstudiantes() async {
     try {
       QuerySnapshot snapshot = await _estudiantesCollection.get();
@@ -169,6 +199,9 @@ class EstudianteController {
     }
   }
 
+  /// Método para eliminar un estudiante.
+  /// 
+  /// [id] es el identificador único del estudiante que se quiere eliminar.
   Future<void> eliminarEstudiante(String id) async {
     try {
       QuerySnapshot querySnapshot = await _estudiantesCollection
@@ -183,6 +216,11 @@ class EstudianteController {
     }
   }
 
+  /// Método para obtener las tareas asignadas a un estudiante por fecha.
+  /// 
+  /// [fecha] es la fecha de las tareas asignadas.
+  /// [nickname] es el nickname del estudiante.
+  /// Devuelve una lista de mapas con las tareas asignadas.
   Future<List<Map<String, dynamic>>> obtenerTareasAsignadasPorFecha(
       String fecha, String nickname) async {
     print('Fecha: $fecha, Nickname: $nickname');
@@ -210,6 +248,10 @@ class EstudianteController {
     }
   }
 
+  /// Método para modificar el perfil de un estudiante.
+  /// 
+  /// [id] es el identificador único del estudiante.
+  /// [nuevosDatos] es un mapa con los nuevos datos del estudiante.
   Future<void> modificarPerfilEstudiante(
       String id, Map<String, dynamic> nuevosDatos) async {
     try {
