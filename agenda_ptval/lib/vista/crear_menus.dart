@@ -17,7 +17,7 @@ class _CrearMenuState extends State<CrearMenu> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nombreController = TextEditingController();
   final TextEditingController _descripcionController = TextEditingController();
-  final MenuController _menuController = MenuController();
+  final MenusController _menuController = MenusController();
   final ImagenController _imagenController = ImagenController();
   File? imagen;
   Uint8List? imagenBytes;
