@@ -97,8 +97,7 @@ class ComandaController {
   }
 
    
-    /// [nombreClase] es el nombre de la clase cuya comanda se confirmará.
-        Future<void> confirmarComandaPorClase(String nombreClase) async {
+    Future<void> confirmarComandaPorClase(String nombreClase) async {
       try {
         await initializeDateFormatting('es_ES', null); // Inicializar configuración regional en español
         DateTime now = DateTime.now().toLocal();
@@ -119,25 +118,37 @@ class ComandaController {
           'hecha': true,
         };
     
-        // Agregar la comanda a la colección 'comandas'
-        DocumentReference docRef = await FirebaseFirestore.instance.collection('comandas').add({
-          'fecha': formattedDate,
-          'nota': nota,
-          'clases': {
-            nombreClase: comandaData,
-          },
-        });
+        // Buscar un documento existente con la misma fecha
+        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+            .collection('comandas')
+            .where('fecha', isEqualTo: formattedDate)
+            .get();
     
-        // Actualizar el documento existente para agregar más clases
-        await FirebaseFirestore.instance.runTransaction((transaction) async {
-          DocumentSnapshot snapshot = await transaction.get(docRef);
+        if (querySnapshot.docs.isNotEmpty) {
+          // Si existe un documento con la misma fecha, actualizarlo
+          DocumentReference docRef = querySnapshot.docs.first.reference;
+          await FirebaseFirestore.instance.runTransaction((transaction) async {
+            DocumentSnapshot snapshot = await transaction.get(docRef);
     
-          if (snapshot.exists) {
-            Map<String, dynamic> existingData = snapshot.data() as Map<String, dynamic>;
-            existingData['clases'][nombreClase] = comandaData;
-            transaction.update(docRef, existingData);
-          }
-        });
+            if (snapshot.exists) {
+              Map<String, dynamic> existingData = snapshot.data() as Map<String, dynamic>;
+              if (existingData['clases'] == null) {
+                existingData['clases'] = {};
+              }
+              existingData['clases'][nombreClase] = comandaData;
+              transaction.update(docRef, existingData);
+            }
+          });
+        } else {
+          // Si no existe un documento con la misma fecha, crear uno nuevo
+          await FirebaseFirestore.instance.collection('comandas').add({
+            'fecha': formattedDate,
+            'nota': nota,
+            'clases': {
+              nombreClase: comandaData,
+            },
+          });
+        }
     
         print('Comanda confirmada para la clase $clase: ${comandas[clase]}');
         print('Nota: $nota');
@@ -145,7 +156,6 @@ class ComandaController {
         print('Error al confirmar comanda para la clase $nombreClase: $e');
       }
     }
-
   /// Método para verificar si la comanda de una clase específica ya está hecha.
     Future<bool> ComprobarComandaClase(String nombreClase) async {
     print("ComprobarComandaClase: $nombreClase");
