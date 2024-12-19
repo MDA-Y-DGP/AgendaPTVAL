@@ -96,33 +96,78 @@ class ComandaController {
     nota = nuevaNota;
   }
 
-  /// Método para confirmar y guardar la comanda en Firestore.
-  Future<void> confirmarComanda() async {
-    try {
-      await initializeDateFormatting(
-          'es_ES', null); // Inicializar configuración regional en español
-      DateTime now = DateTime.now().toLocal();
-      String formattedDate = DateFormat('d MMMM yyyy', 'es_ES')
-          .format(now); // Formatear la fecha en español
-
-      Map<String, dynamic> comandaData = {
-        'fecha': formattedDate,
-        'nota': nota,
-        'clases': comandas.map((clase, menus) {
-          return MapEntry(clase, {
-            'menus': menus,
-          });
-        }),
-      };
-
-      await FirebaseFirestore.instance.collection('comandas').add(comandaData);
-      print('Comanda confirmada: $comandas');
-      print('Nota: $nota');
-    } catch (e) {
-      print('Error al confirmar comanda: $e');
+   
+    /// [nombreClase] es el nombre de la clase cuya comanda se confirmará.
+        Future<void> confirmarComandaPorClase(String nombreClase) async {
+      try {
+        await initializeDateFormatting('es_ES', null); // Inicializar configuración regional en español
+        DateTime now = DateTime.now().toLocal();
+        String formattedDate = DateFormat('d MMMM yyyy', 'es_ES').format(now); // Formatear la fecha en español
+    
+        // Buscar la clase a partir del nombre de la clase
+        var clase = comandas.keys.firstWhere((key) => key == nombreClase, orElse: () => '');
+    
+        if (clase.isEmpty) {
+          print('Clase no encontrada: $nombreClase');
+          return;
+        }
+    
+        Map<String, dynamic> comandaData = {
+          'fecha': formattedDate,
+          'nota': nota,
+          'menus': comandas[clase],
+          'hecha': true,
+        };
+    
+        // Agregar la comanda a la colección 'comandas'
+        DocumentReference docRef = await FirebaseFirestore.instance.collection('comandas').add({
+          'fecha': formattedDate,
+          'nota': nota,
+          'clases': {
+            nombreClase: comandaData,
+          },
+        });
+    
+        // Actualizar el documento existente para agregar más clases
+        await FirebaseFirestore.instance.runTransaction((transaction) async {
+          DocumentSnapshot snapshot = await transaction.get(docRef);
+    
+          if (snapshot.exists) {
+            Map<String, dynamic> existingData = snapshot.data() as Map<String, dynamic>;
+            existingData['clases'][nombreClase] = comandaData;
+            transaction.update(docRef, existingData);
+          }
+        });
+    
+        print('Comanda confirmada para la clase $clase: ${comandas[clase]}');
+        print('Nota: $nota');
+      } catch (e) {
+        print('Error al confirmar comanda para la clase $nombreClase: $e');
+      }
     }
-  }
 
+  /// Método para verificar si la comanda de una clase específica ya está hecha.
+    Future<bool> ComprobarComandaClase(String nombreClase) async {
+    print("ComprobarComandaClase: $nombreClase");
+    try {
+      DocumentSnapshot snapshot = await FirebaseFirestore.instance.collection('comandas').doc('comanda').get();
+      if (snapshot.exists) {
+        Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
+        var clasesData = data['clases'];
+        if (clasesData != null && clasesData is Map) {
+          var claseData = clasesData[nombreClase];
+          if (claseData != null && claseData is Map) {
+            print("ClaseData: $claseData"+" hecha");
+            return claseData['hecha'] == true;
+            
+          }
+        }
+      }
+    } catch (e) {
+      print('Error al verificar si la comanda está hecha para la clase $nombreClase: $e');
+    }
+    return false;
+  }
   /// Método para cambiar la página actual en el controlador de página.
   /// 
   /// [index] es el índice de la nueva página.

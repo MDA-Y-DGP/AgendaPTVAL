@@ -74,14 +74,44 @@ class _RealizarComandaState extends State<RealizarComanda> {
                       ),
                       SizedBox(width: 10),
                       Expanded(
-                        child: Container(
-                          height: 200,
-                          padding: EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: Colors.blueAccent,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: _buildMenuItems(nombreClase),
+                        child: FutureBuilder<bool>(
+                          future: _controller.ComprobarComandaClase(nombreClase),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return Center(child: CircularProgressIndicator());
+                            } else if (snapshot.hasError) {
+                              print('Error al obtener el estado de la comanda: ${snapshot.error}');
+                              return Container(
+                                height: 200,
+                                padding: EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: Colors.redAccent,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Center(child: Text('Error')),
+                              );
+                            } else if (snapshot.hasData && snapshot.data == true) {
+                              return Container(
+                                height: 200,
+                                padding: EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: Colors.green,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: _buildMenuItems(nombreClase),
+                              );
+                            } else {
+                              return Container(
+                                height: 200,
+                                padding: EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: Colors.blueAccent,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: _buildMenuItems(nombreClase),
+                              );
+                            }
+                          },
                         ),
                       ),
                     ],
@@ -125,7 +155,7 @@ class _RealizarComandaState extends State<RealizarComanda> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       padding: EdgeInsets.all(10),
-                      child: Center(child: _buildConfirmButton()),
+                      child: Center(child: _buildConfirmButton(nombreClase)),
                     ),
                   ),
                 ],
@@ -133,7 +163,8 @@ class _RealizarComandaState extends State<RealizarComanda> {
             ),
     );
   }
-
+  
+  
   Widget _buildClassInfo(String clase) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -144,14 +175,13 @@ class _RealizarComandaState extends State<RealizarComanda> {
           clase,
           style: TextStyle(
             color: Colors.white,
-            fontSize: 18,
+            fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
         ),
       ],
     );
   }
-
   Widget _buildClassImage() {
     return FutureBuilder<String?>(
       future: _imageController.obtenerImagenClase(nombreClase),
@@ -343,30 +373,38 @@ class _RealizarComandaState extends State<RealizarComanda> {
     );
   }
 
-  Widget _buildConfirmButton() {
-    return InkWell(
-      onTap: _controller.confirmarComanda,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            'assets/pictograma_completado.png',
-            height: 100,
-            fit: BoxFit.cover,
-          ),
-          SizedBox(height: 10),
-          Text(
-            'Confirmar',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
+        Widget _buildConfirmButton(String clase) {
+      return InkWell(
+        onTap: () async {
+          await _controller.confirmarComandaPorClase(clase);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Comanda confirmada para la clase $clase'),
             ),
-          ),
-        ],
-      ),
-    );
-  }
+          );
+          Navigator.pop(context);
+        },
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              'assets/pictograma_completado.png',
+              height: 100,
+              fit: BoxFit.cover,
+            ),
+            SizedBox(height: 10),
+            Text(
+              'Confirmar Comanda',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 }
 
 class MenuItemQuantity extends StatefulWidget {
