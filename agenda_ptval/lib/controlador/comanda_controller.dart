@@ -159,16 +159,28 @@ class ComandaController {
     Future<bool> ComprobarComandaClase(String nombreClase) async {
     print("ComprobarComandaClase: $nombreClase");
     try {
-      DocumentSnapshot snapshot = await FirebaseFirestore.instance.collection('comandas').doc('comanda').get();
-      if (snapshot.exists) {
+      // Inicializar configuración regional
+      await initializeDateFormatting('es_ES', null);
+  
+      // Obtener la fecha actual formateada
+      DateTime now = DateTime.now().toLocal();
+      String formattedDate = DateFormat('d MMMM yyyy', 'es_ES').format(now);
+  
+      // Buscar un documento existente con la misma fecha
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('comandas')
+          .where('fecha', isEqualTo: formattedDate)
+          .get();
+  
+      if (querySnapshot.docs.isNotEmpty) {
+        DocumentSnapshot snapshot = querySnapshot.docs.first;
         Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
         var clasesData = data['clases'];
         if (clasesData != null && clasesData is Map) {
           var claseData = clasesData[nombreClase];
           if (claseData != null && claseData is Map) {
-            print("ClaseData: $claseData"+" hecha");
+            print("ClaseData: $claseData" + " hecha");
             return claseData['hecha'] == true;
-            
           }
         }
       }
@@ -176,16 +188,5 @@ class ComandaController {
       print('Error al verificar si la comanda está hecha para la clase $nombreClase: $e');
     }
     return false;
-  }
-  /// Método para cambiar la página actual en el controlador de página.
-  /// 
-  /// [index] es el índice de la nueva página.
-  void cambiarPagina(int index) {
-    paginaActual = index;
-    pageController.animateToPage(
-      index,
-      duration: Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
   }
 }
