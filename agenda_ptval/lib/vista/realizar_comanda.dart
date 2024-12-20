@@ -74,44 +74,14 @@ class _RealizarComandaState extends State<RealizarComanda> {
                       ),
                       SizedBox(width: 10),
                       Expanded(
-                        child: FutureBuilder<bool>(
-                          future: _controller.ComprobarComandaClase(nombreClase),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState == ConnectionState.waiting) {
-                              return Center(child: CircularProgressIndicator());
-                            } else if (snapshot.hasError) {
-                              print('Error al obtener el estado de la comanda: ${snapshot.error}');
-                              return Container(
-                                height: 200,
-                                padding: EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: Colors.redAccent,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Center(child: Text('Error')),
-                              );
-                            } else if (snapshot.hasData && snapshot.data == true) {
-                              return Container(
-                                height: 200,
-                                padding: EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: Colors.green,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: _buildMenuItems(nombreClase),
-                              );
-                            } else {
-                              return Container(
-                                height: 200,
-                                padding: EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: Colors.blueAccent,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: _buildMenuItems(nombreClase),
-                              );
-                            }
-                          },
+                        child: Container(
+                          height: 200,
+                          padding: EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.blueAccent,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: _buildMenuItems(nombreClase),
                         ),
                       ),
                     ],
