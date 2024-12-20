@@ -4,6 +4,8 @@ import 'package:agenda_ptval/modelo/tarea_modelo.dart';
 import 'package:agenda_ptval/widgets/imagen_con_texto.dart'; // Importa el nuevo widget
 import 'realizar_tarea_pasos.dart';
 import 'seleccionar_clase.dart';
+import 'realizar_tarea_inventario.dart';
+import '../controlador/imagen_controller.dart';
 
 class PaginaPrincipalEstudiante extends StatefulWidget {
   final String nickname;
@@ -18,6 +20,7 @@ class PaginaPrincipalEstudiante extends StatefulWidget {
 class _PaginaPrincipalEstudianteState extends State<PaginaPrincipalEstudiante> {
   late PageController _pageController;
   late TareaController _tareaController;
+  final ImagenController _imagenController = ImagenController();
   int _currentPage = 0;
   List<Tarea> _tareasDelDia = []; // Lista de tareas del día actual
 
@@ -64,6 +67,7 @@ class _PaginaPrincipalEstudianteState extends State<PaginaPrincipalEstudiante> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Página Principal Estudiante'),
+        backgroundColor: Colors.blueAccent,
       ),
       body: Column(
         children: [
@@ -96,7 +100,14 @@ class _PaginaPrincipalEstudianteState extends State<PaginaPrincipalEstudiante> {
       children: _tareasDelDia.map((tarea) {
         return GestureDetector(
           onTap: () {
-            if (tarea.tipo == 'comedor') {
+            if (tarea.tipo == 'inventario') {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => RealizarTareaInventario(),
+                ),
+              );
+            } else if (tarea.tipo == 'comedor') {
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -128,10 +139,24 @@ class _PaginaPrincipalEstudianteState extends State<PaginaPrincipalEstudiante> {
                       : Colors.transparent,
                   BlendMode.saturation,
                 ),
-                child: ImagenConTexto(
-                  imageUrl: _getPictogramaTarea(tarea),
-                  texto: tarea.titulo,
-                ),
+                    child: FutureBuilder<String>(
+                          future: _getPictogramaTarea(tarea),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return CircularProgressIndicator();
+                            } else if (snapshot.hasError || !snapshot.hasData) {
+                              return ImagenConTexto(
+                                imageUrl: 'assets/pictograma_pasos.png',
+                                texto: tarea.titulo,
+                              );
+                            } else {
+                              return ImagenConTexto(
+                                imageUrl: snapshot.data!,
+                                texto: tarea.titulo,
+                              );
+                            }
+                          },
+                        ),                           
               ),
             ),
           ),
@@ -140,14 +165,19 @@ class _PaginaPrincipalEstudianteState extends State<PaginaPrincipalEstudiante> {
     );
   }
 
-  String _getPictogramaTarea(Tarea tarea) {
+    Future<String> _getPictogramaTarea(Tarea tarea) async {
     switch (tarea.tipo) {
       case 'comedor':
         return 'assets/pictograma_comedor.png';
       case 'inventario':
         return 'assets/pictograma_inventario.png';
       case 'por pasos':
+      try {
+        return await _imagenController.obtenerImagenPaso(tarea.idTarea, 0);
+      } catch (e) {
         return 'assets/pictograma_pasos.png';
+      }
+
       default:
         return 'assets/default.png';
     }
