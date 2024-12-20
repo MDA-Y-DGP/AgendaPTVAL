@@ -37,6 +37,10 @@ class _CrearTareaState extends State<CrearTarea> {
   String? _perfilFileName;
   final ImagePicker _picker = ImagePicker();
 
+  List<File> _mediaFiles = [];
+  List<Uint8List> _mediaBytesList = [];
+  List<String> _mediaFileNames = [];
+
   @override
   void initState() {
     super.initState();
@@ -129,9 +133,9 @@ class _CrearTareaState extends State<CrearTarea> {
           child: Container(
             height: 40,
             child: ListTile(
-              title: Text(_mediaFile == null && _mediaBytes == null
-                  ? 'Selecciona una imagen/video'
-                  : 'Media seleccionada: $_mediaFileName'),
+              title: Text(_mediaFiles.isEmpty && _mediaBytesList.isEmpty
+                  ? 'Selecciona imágenes/videos'
+                  : 'Media seleccionada: ${_mediaFileNames.join(', ')}'),
               trailing: const Icon(Icons.image),
               onTap: _pickMedia,
             ),
@@ -203,21 +207,23 @@ class _CrearTareaState extends State<CrearTarea> {
     return ElevatedButton(
       onPressed: () async {
         if (_nuevoPasoController.text.isNotEmpty) {
-          String? urlMedia = _mediaFile != null || _mediaBytes != null
-              ? await _subirImagenPaso(_mediaFile, _mediaBytes, _pasos.length + 1)
-              : null;
+          List<String?> urlsMedia = [];
+          for (int i = 0; i < _mediaFiles.length; i++) {
+            String? urlMedia = await _subirImagenPaso(_mediaFiles[i], _mediaBytesList.isNotEmpty ? _mediaBytesList[i] : null, _pasos.length + 1);
+            urlsMedia.add(urlMedia);
+          }
 
           setState(() {
             _pasos.add({
               'texto': _nuevoPasoController.text,
-              'mediaFile': _mediaFile,
-              'mediaBytes': _mediaBytes,
-              'urlMedia': urlMedia,
+              'mediaFiles': _mediaFiles,
+              'mediaBytesList': _mediaBytesList,
+              'urlsMedia': urlsMedia,
             });
             _nuevoPasoController.clear();
-            _mediaFile = null;
-            _mediaBytes = null;
-            _mediaFileName = null;
+            _mediaFiles = [];
+            _mediaBytesList = [];
+            _mediaFileNames = [];
           });
         }
       },
@@ -250,11 +256,15 @@ class _CrearTareaState extends State<CrearTarea> {
 
               for (var i = 0; i < _pasos.length; i++) {
                 var paso = _pasos[i];
-                if (paso['urlMedia'] == null &&
-                    (paso['mediaFile'] != null || paso['mediaBytes'] != null)) {
-                  String? urlMedia = await _subirImagenPaso(
-                      paso['mediaFile'], paso['mediaBytes'], i + 1);
-                  paso['urlMedia'] = urlMedia;
+                if (paso['urlsMedia'] == null &&
+                    (paso['mediaFiles'] != null || paso['mediaBytesList'] != null)) {
+                  List<String?> urlsMedia = [];
+                  for (int j = 0; j < paso['mediaFiles'].length; j++) {
+                    String? urlMedia = await _subirImagenPaso(
+                        paso['mediaFiles'][j], paso['mediaBytesList'].isNotEmpty ? paso['mediaBytesList'][j] : null, i + 1);
+                    urlsMedia.add(urlMedia);
+                  }
+                  paso['urlsMedia'] = urlsMedia;
                 }
               }
             }
@@ -338,18 +348,18 @@ class _CrearTareaState extends State<CrearTarea> {
 
   Future<void> _pickMedia() async {
     try {
-      final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-      if (pickedFile != null) {
+      final pickedFiles = await _picker.pickMultiImage();
+      if (pickedFiles != null && pickedFiles.isNotEmpty) {
         if (kIsWeb) {
-          final bytes = await pickedFile.readAsBytes();
+          final bytesList = await Future.wait(pickedFiles.map((file) => file.readAsBytes()));
           setState(() {
-            _mediaBytes = bytes;
-            _mediaFileName = pickedFile.name;
+            _mediaBytesList = bytesList;
+            _mediaFileNames = pickedFiles.map((file) => file.name).toList();
           });
         } else {
           setState(() {
-            _mediaFile = File(pickedFile.path);
-            _mediaFileName = pickedFile.path.split('/').last;
+            _mediaFiles = pickedFiles.map((file) => File(file.path)).toList();
+            _mediaFileNames = pickedFiles.map((file) => file.path.split('/').last).toList();
           });
         }
       }
@@ -364,7 +374,7 @@ class _CrearTareaState extends State<CrearTarea> {
       File? mediaFile, Uint8List? mediaBytes, int pasoIndex) async {
     if (mediaFile != null || mediaBytes != null) {
       try {
-        String nombreArchivo = pasoIndex == 0 ? _perfilFileName ?? '' : _mediaFileName ?? '';
+        String nombreArchivo = pasoIndex == 0 ? _perfilFileName ?? '' : _mediaFileNames[pasoIndex - 1] ?? '';
         if (RegExp(r'^\d+$').hasMatch(nombreArchivo)) {
           return null;
         }
