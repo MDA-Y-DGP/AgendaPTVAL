@@ -112,7 +112,6 @@ class ComandaController {
         }
     
         Map<String, dynamic> comandaData = {
-          'fecha': formattedDate,
           'nota': nota,
           'menus': comandas[clase],
           'hecha': true,
