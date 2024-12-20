@@ -48,7 +48,7 @@ class _RealizarComandaState extends State<RealizarComanda> {
                     children: [
                       InkWell(
                         onTap: () {
-                          Navigator.push(
+                          Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
                               builder: (context) => SeleccionarClasePage(),
@@ -115,19 +115,52 @@ class _RealizarComandaState extends State<RealizarComanda> {
                       ],
                     ],
                   ),
-                  SizedBox(height: 10),
-                  Center(
-                    child: Container(
-                      width: 200,
-                      height: 200,
-                      decoration: BoxDecoration(
-                        color: Colors.orangeAccent,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      padding: EdgeInsets.all(10),
-                      child: Center(child: _buildConfirmButton(nombreClase)),
-                    ),
-                  ),
+                                                                                      SizedBox(height: 10),
+                                                                                      Center(
+                                                                                        child: ElevatedButton(
+                                                                                          style: ElevatedButton.styleFrom(
+                                                                                            backgroundColor: Colors.orangeAccent, // Fondo del botón
+                                                                                            foregroundColor: Colors.white, // Color del texto
+                                                                                            shape: RoundedRectangleBorder(
+                                                                                              borderRadius: BorderRadius.circular(10),
+                                                                                            ),
+                                                                                            padding: EdgeInsets.all(10),
+                                                                                            minimumSize: Size(200, 200), // Tamaño mínimo del botón
+                                                                                          ),
+                                                                                          onPressed: () async {
+                                                                                            try {
+                                                                                              await _controller.confirmarComandaPorClase(nombreClase);
+                                                                                              Navigator.pushReplacement(
+                                                                                                context,
+                                                                                                MaterialPageRoute(
+                                                                                                  builder: (context) => SeleccionarClasePage(),
+                                                                                                ),
+                                                                                              );
+                                                                                            } catch (e) {
+                                                                                              print('Error al confirmar comanda: $e');
+                                                                                            }
+                                                                                          },
+                                                                                          child: Column(
+                                                                                            mainAxisAlignment: MainAxisAlignment.center,
+                                                                                            children: [
+                                                                                              Image.asset(
+                                                                                                'assets/pictograma_completado.png',
+                                                                                                height: 100,
+                                                                                                fit: BoxFit.cover,
+                                                                                              ),
+                                                                                              SizedBox(height: 10),
+                                                                                              Text(
+                                                                                                'Confirmar Comanda',
+                                                                                                style: TextStyle(
+                                                                                                  color: Colors.white,
+                                                                                                  fontSize: 16,
+                                                                                                  fontWeight: FontWeight.bold,
+                                                                                                ),
+                                                                                              ),
+                                                                                            ],
+                                                                                          ),
+                                                                                        ),
+                                                                                      ),                                                                                      
                 ],
               ),
             ),
