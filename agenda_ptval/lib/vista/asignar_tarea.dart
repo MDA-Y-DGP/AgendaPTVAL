@@ -230,60 +230,54 @@ class _AsignarTareaState extends State<AsignarTarea> {
     );
   }
 
-  Widget _buildFechaPicker() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Selecciona una fecha',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.primary,
-          ),
+Widget _buildFechaPicker() {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        'Selecciona una fecha',
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: Theme.of(context).colorScheme.primary,
         ),
-        const SizedBox(height: 10),
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                _selectedDate == null
-                    ? 'No se ha seleccionado ninguna fecha'
-                    : DateFormat('yyyy-MM-dd').format(_selectedDate!),
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
+      ),
+      const SizedBox(height: 10),
+      Row(
+        children: [
+          Expanded(
+            child: Text(
+              _selectedDate == null
+                  ? 'No se ha seleccionado ninguna fecha'
+                  : DateFormat('yyyy-MM-dd').format(_selectedDate!),
+              style: TextStyle(
+                fontSize: 16,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
-            IconButton(
-              icon: Icon(Icons.calendar_today, color: Theme.of(context).colorScheme.primary),
-              onPressed: () async {
-                DateTime? pickedDate = await showDatePicker(
-                  context: context,
-                  initialDate: DateTime.now(),
-                  firstDate: DateTime.now(),
-                  lastDate: DateTime(2100),
-                  selectableDayPredicate: (DateTime date) {
-                    // Deshabilitar sábados y domingos
-                    if (date.weekday == 6 || date.weekday == 7) {
-                      return false;
-                    }
-                    return true;
-                  },
-                );
-                if (pickedDate != null) {
-                  setState(() {
-                    _selectedDate = pickedDate;
-                  });
-                }
-              },
-            ),
-          ],
-        ),
-      ],
-    );
-  }
+          ),
+          IconButton(
+            icon: Icon(Icons.calendar_today, color: Theme.of(context).colorScheme.primary),
+            onPressed: () async {
+              DateTime? pickedDate = await showDatePicker(
+                context: context,
+                initialDate: DateTime.now(),
+                firstDate: DateTime(2000), // Permitir seleccionar fechas pasadas
+                lastDate: DateTime(2100),
+              );
+              if (pickedDate != null) {
+                setState(() {
+                  _selectedDate = pickedDate;
+                });
+              }
+            },
+          ),
+        ],
+      ),
+    ],
+  );
+}
+
 
   void _fetchEstudiantesPorClase(String claseId) async {
     List<Estudiante> estudiantes = await _estudianteController.obtenerEstudiantesPorClase(claseId);
