@@ -92,96 +92,95 @@ class _PaginaPrincipalEstudianteState extends State<PaginaPrincipalEstudiante> {
     );
   }
 
-  Widget _buildDayView() {
-    return Wrap(
-      spacing: 10, // Espacio horizontal entre los elementos
-      runSpacing: 10, // Espacio vertical entre las filas
-      alignment: WrapAlignment.center, // Centra los elementos en el Wrap
-      children: _tareasDelDia.map((tarea) {
-        return GestureDetector(
-          onTap: () {
-            if (tarea.tipo == 'inventario') {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => RealizarTareaInventario(),
-                ),
-              );
-            } else if (tarea.tipo == 'comedor') {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => SeleccionarClasePage(),
-                ),
-              );
-            } else if (tarea.tipo == 'por pasos') {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => RealizarTareaPorPasos(idTarea: tarea.idTarea, nickname: widget.nickname),
-                ),
-              );
-            }
-          },
-          child: Container(
-            width: 200,
-            height: 200,
-            decoration: BoxDecoration(
-              color: Colors.blue,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: ColorFiltered(
-                colorFilter: ColorFilter.mode(
-                  _tareasCompletadas[tarea.idTarea]!
-                      ? Colors.grey
-                      : Colors.transparent,
-                  BlendMode.saturation,
-                ),
-                    child: FutureBuilder<String>(
-                          future: _getPictogramaTarea(tarea),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState == ConnectionState.waiting) {
-                              return CircularProgressIndicator();
-                            } else if (snapshot.hasError || !snapshot.hasData) {
-                              return ImagenConTexto(
-                                imageUrl: 'assets/pictograma_pasos.png',
-                                texto: tarea.titulo,
-                              );
-                            } else {
-                              return ImagenConTexto(
-                                imageUrl: snapshot.data!,
-                                texto: tarea.titulo,
-                              );
-                            }
-                          },
-                        ),                           
+Widget _buildDayView() {
+  return Wrap(
+    spacing: 10, // Espacio horizontal entre los elementos
+    runSpacing: 10, // Espacio vertical entre las filas
+    alignment: WrapAlignment.center, // Centra los elementos en el Wrap
+    children: _tareasDelDia.map((tarea) {
+      return GestureDetector(
+        onTap: () {
+          if (tarea.tipo == 'inventario') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => RealizarTareaInventario(),
+              ),
+            );
+          } else if (tarea.tipo == 'comedor') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SeleccionarClasePage(),
+              ),
+            );
+          } else if (tarea.tipo == 'por pasos') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => RealizarTareaPorPasos(idTarea: tarea.idTarea, nickname: widget.nickname),
+              ),
+            );
+          }
+        },
+        child: Container(
+          width: 200,
+          height: 200,
+          decoration: BoxDecoration(
+            color: Colors.blue,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: ColorFiltered(
+              colorFilter: ColorFilter.mode(
+                _tareasCompletadas[tarea.idTarea]!
+                    ? Colors.grey
+                    : Colors.transparent,
+                BlendMode.saturation,
+              ),
+              child: FutureBuilder<String>(
+                future: _getPictogramaTarea(tarea),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError || !snapshot.hasData) {
+                    return ImagenConTexto(
+                      imageUrl: 'assets/pictograma_pasos.png',
+                      texto: tarea.titulo,
+                    );
+                  } else {
+                    return ImagenConTexto(
+                      imageUrl: snapshot.data!,
+                      texto: tarea.titulo,
+                    );
+                  }
+                },
               ),
             ),
           ),
-        );
-      }).toList(),
-    );
-  }
+        ),
+      );
+    }).toList(),
+  );
+}
 
-    Future<String> _getPictogramaTarea(Tarea tarea) async {
-    switch (tarea.tipo) {
-      case 'comedor':
-        return 'assets/pictograma_comedor.png';
-      case 'inventario':
-        return 'assets/pictograma_inventario.png';
-      case 'por pasos':
+Future<String> _getPictogramaTarea(Tarea tarea) async {
+  switch (tarea.tipo) {
+    case 'comedor':
+      return 'assets/pictograma_comedor.png';
+    case 'inventario':
+      return 'assets/pictograma_inventario.png';
+    case 'por pasos':
       try {
         return await _imagenController.obtenerImagenPaso(tarea.idTarea, 0);
       } catch (e) {
         return 'assets/pictograma_pasos.png';
       }
-
-      default:
-        return 'assets/default.png';
-    }
+    default:
+      return 'assets/default.png';
   }
+}
 
   Widget _buildHeader() {
     return Row(
@@ -253,7 +252,7 @@ class _PaginaPrincipalEstudianteState extends State<PaginaPrincipalEstudiante> {
       case 4:
         return 'assets/pictograma_viernes.png';
       default:
-        return '';
+        return 'assets/default.png';
     }
   }
 }

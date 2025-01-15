@@ -20,12 +20,19 @@ class ImagenConTexto extends StatelessWidget {
       height: 220, // Increase the height to ensure both image and text are visible
       child: Column(
         children: [
-          Image.network(
-            imageUrl,
-            height: imageHeight ?? 150, // Set a default height for the image
-            width: imageWidth,
-            fit: BoxFit.cover,
-          ),
+          imageUrl.startsWith('assets/')
+              ? Image.asset(
+                  imageUrl,
+                  height: imageHeight ?? 150, // Set a default height for the image
+                  width: imageWidth,
+                  fit: BoxFit.cover,
+                )
+              : Image.network(
+                  imageUrl,
+                  height: imageHeight ?? 150, // Set a default height for the image
+                  width: imageWidth,
+                  fit: BoxFit.cover,
+                ),
           const SizedBox(height: 8),
           Text(
             texto,
