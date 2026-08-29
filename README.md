@@ -1,2 +1,1 @@
-# App
-Aqui se desarrollara nuestra aplicacion
+Proyecto de innovación docente para el colegio San Rafael.
